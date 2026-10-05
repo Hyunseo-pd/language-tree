@@ -19,6 +19,8 @@ export default function WordCardScreen() {
 function showNext() {
   setIndex((prev) => (prev + 1) % sampleWords.length);
 }
+
+const [showMeaning, setShowMeaning] = useState(false);
   const { wordId } = useLocalSearchParams<{ wordId: string }>();
   const word = wordId === "sample" ? "streben" : wordId;
 
@@ -46,8 +48,9 @@ function showNext() {
   icon="‹"
   style={styles.cardArrowLeft}
   onPress={showPrevious}
-/>
-          <Text style={styles.word}>{currentWord.word}</Text>
+/><Pressable onPress={() => setShowMeaning((prev) => !prev)}>
+          <Text style={styles.word}>{showMeaning ? currentWord.meaning : currentWord.word}</Text>
+          </Pressable>
           <IconButton
   label="다음 단어"
   icon="›"
