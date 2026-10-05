@@ -1,12 +1,17 @@
-import { Text, View } from "react-native";
+import { Link, type Href } from "expo-router";
 
-export default function App() {
+import { NavButton } from "@/components/NavButton";
+import { ScreenShell } from "@/components/ScreenShell";
+
+export default function WordListScreen() {
   return (
-    <View>
-      <Text>언어의 나무</Text>
-      <Text>沈殿</Text>
-      <Text>ちんでん</Text>
-      <Text>침전</Text>
-    </View>
+    <ScreenShell title="단어 리스트">
+      <Link href={"/sample" as Href} asChild>
+        <NavButton label="단어 카드" />
+      </Link>
+      <Link href="/languagesList" asChild>
+        <NavButton label="언어 리스트" />
+      </Link>
+    </ScreenShell>
   );
 }

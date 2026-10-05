@@ -28,8 +28,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
+          "backgroundColor": "#00580A",
+          "image": "./assets/images/언어의 나무.png",
           "imageWidth": 76
         }
       ]
