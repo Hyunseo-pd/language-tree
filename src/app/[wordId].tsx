@@ -50,6 +50,9 @@ const [showMeaning, setShowMeaning] = useState(false);
   onPress={showPrevious}
 /><Pressable onPress={() => setShowMeaning((prev) => !prev)}>
           <Text style={styles.word}>{showMeaning ? currentWord.meaning : currentWord.word}</Text>
+          <Text style={styles.hint}>
+  {showMeaning ? "눌러서 단어 보기" : "눌러서 뜻 보기"}
+</Text>
           </Pressable>
           <IconButton
   label="다음 단어"
@@ -146,6 +149,11 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     lineHeight: 66,
   },
+  hint: {
+  marginTop: 16,
+  fontSize: 14,
+  color: "#888",
+},
   exampleButton: {
     marginTop: 210,
     paddingHorizontal: 8,
