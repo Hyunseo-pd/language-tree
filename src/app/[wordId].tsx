@@ -1,79 +1,161 @@
 import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View, type PressableProps, type ViewStyle } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type PressableProps,
+  type ViewStyle,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function WordCardScreen() {
-  const sampleWords = [
-  { id: "1", word: "streben", meaning: "노력하다, 추구하다" },
-  { id: "2", word: "lernen", meaning: "배우다" },
-  { id: "3", word: "wachsen", meaning: "자라다" },
+import { subscribeToWords, type WordItem } from "@/lib/languageStore";
+
+const sampleWords: WordItem[] = [
+  { id: "1", word: "streben", meaning: "to strive, to pursue" },
+  { id: "2", word: "lernen", meaning: "to learn" },
+  { id: "3", word: "wachsen", meaning: "to grow" },
 ];
-  const [index, setIndex] = useState(0);
-  const currentWord = sampleWords[index];
+
+export default function WordCardScreen() {
+  const { wordId, languageId } = useLocalSearchParams<{
+    wordId?: string;
+    languageId?: string;
+  }>();
+  const [firebaseWords, setFirebaseWords] = useState<WordItem[]>([]);
+  const [isLoading, setIsLoading] = useState(Boolean(languageId));
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [indexOffset, setIndexOffset] = useState(0);
+  const [showMeaning, setShowMeaning] = useState(false);
+
+  useEffect(() => {
+    if (!languageId) {
+      return;
+    }
+
+    const unsubscribe = subscribeToWords(
+      languageId,
+      (nextWords) => {
+        setFirebaseWords(nextWords);
+        setIsLoading(false);
+        setErrorMessage(null);
+      },
+      (error) => {
+        setErrorMessage(error.message);
+        setIsLoading(false);
+      },
+    );
+
+    return unsubscribe;
+  }, [languageId]);
+
+  const words = useMemo(
+    () => (languageId ? firebaseWords : sampleWords),
+    [firebaseWords, languageId],
+  );
+
+  const selectedIndex = Math.max(
+    0,
+    words.findIndex((word) => word.id === wordId),
+  );
+  const index = words.length === 0 ? 0 : (selectedIndex + indexOffset + words.length) % words.length;
+  const currentWord = words[index];
 
   function showPrevious() {
-  setIndex((prev) => (prev - 1 + sampleWords.length) % sampleWords.length);
-}
+    if (words.length === 0) {
+      return;
+    }
 
-function showNext() {
-  setIndex((prev) => (prev + 1) % sampleWords.length);
-}
+    setShowMeaning(false);
+    setIndexOffset((prev) => prev - 1);
+  }
 
-const [showMeaning, setShowMeaning] = useState(false);
-  const { wordId } = useLocalSearchParams<{ wordId: string }>();
-  const word = wordId === "sample" ? "streben" : wordId;
+  function showNext() {
+    if (words.length === 0) {
+      return;
+    }
+
+    setShowMeaning(false);
+    setIndexOffset((prev) => prev + 1);
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
         <View style={styles.header}>
-          <Link href="/" asChild>
-            <IconButton label="단어 리스트" icon="☷" />
+          <Link
+            href={
+              languageId
+                ? (`/languages/${encodeURIComponent(languageId)}` as Href)
+                : "/"
+            }
+            asChild
+          >
+            <IconButton label="Back to list" icon="<" />
           </Link>
 
-          <Text style={styles.counter}>{index + 1}/{sampleWords.length}</Text>
+          <Text style={styles.counter}>
+            {words.length === 0 ? 0 : index + 1}/{words.length}
+          </Text>
 
           <View style={styles.headerActions}>
-            <IconButton label="삭제" icon="⌫" />
+            <IconButton label="Delete word" icon="-" />
             <Link href={`/${wordId}/edit` as Href} asChild>
-              <IconButton label="단어 편집" icon="✎" />
+              <IconButton label="Edit word" icon="+" />
             </Link>
           </View>
         </View>
 
         <View style={styles.card}>
-         <IconButton
-  label="이전 단어"
-  icon="‹"
-  style={styles.cardArrowLeft}
-  onPress={showPrevious}
-/><Pressable onPress={() => setShowMeaning((prev) => !prev)}>
-          <Text style={styles.word}>{showMeaning ? currentWord.meaning : currentWord.word}</Text>
-          <Text style={styles.hint}>
-  {showMeaning ? "눌러서 단어 보기" : "눌러서 뜻 보기"}
-</Text>
-          </Pressable>
           <IconButton
-  label="다음 단어"
-  icon="›"
-  style={styles.cardArrowRight}
-  onPress={showNext}
-/>
+            label="Previous word"
+            icon="<"
+            style={styles.cardArrowLeft}
+            onPress={showPrevious}
+          />
+
+          {isLoading ? (
+            <View style={styles.centerState}>
+              <ActivityIndicator />
+              <Text style={styles.stateText}>Loading list...</Text>
+            </View>
+          ) : null}
+
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
+          {!isLoading && !errorMessage && !currentWord ? (
+            <Text style={styles.stateText}>No items found.</Text>
+          ) : null}
+
+          {currentWord ? (
+            <Pressable onPress={() => setShowMeaning((prev) => !prev)}>
+              <Text style={styles.word}>{showMeaning ? currentWord.meaning : currentWord.word}</Text>
+              <Text style={styles.hint}>{showMeaning ? "Tap to see word" : "Tap to see meaning"}</Text>
+            </Pressable>
+          ) : null}
+
+          <IconButton
+            label="Next word"
+            icon=">"
+            style={styles.cardArrowRight}
+            onPress={showNext}
+          />
 
           <Pressable accessibilityRole="button" style={styles.exampleButton}>
-            <Text style={styles.exampleText}>예문 생성하기</Text>
+            <Text style={styles.exampleText}>Generate example</Text>
           </Pressable>
         </View>
 
         <View style={styles.footer}>
-          <IconButton label="이전" icon="‹" />
-          <IconButton label="즐겨찾기" icon="☆" />
+          <IconButton label="Previous" icon="<" onPress={showPrevious} />
+          <IconButton label="Favorite" icon="*" />
           <View style={styles.sortGroup}>
-            <IconButton label="정렬 방식" icon="≡" />
-            <Text style={styles.sortText}>정렬</Text>
+            <IconButton label="Sort" icon="=" />
+            <Text style={styles.sortText}>Sort</Text>
           </View>
-          <IconButton label="다음" icon="›" />
+          <IconButton label="Next" icon=">" onPress={showNext} />
         </View>
       </View>
     </SafeAreaView>
@@ -148,12 +230,15 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: "800",
     lineHeight: 66,
+    paddingHorizontal: 44,
+    textAlign: "center",
   },
   hint: {
-  marginTop: 16,
-  fontSize: 14,
-  color: "#888",
-},
+    marginTop: 16,
+    fontSize: 14,
+    color: "#888888",
+    textAlign: "center",
+  },
   exampleButton: {
     marginTop: 210,
     paddingHorizontal: 8,
@@ -193,5 +278,22 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: "700",
     lineHeight: 52,
+  },
+  centerState: {
+    alignItems: "center",
+    gap: 10,
+  },
+  errorText: {
+    color: "#b00020",
+    fontSize: 14,
+    lineHeight: 20,
+    paddingHorizontal: 24,
+    textAlign: "center",
+  },
+  stateText: {
+    color: "#666666",
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: "center",
   },
 });

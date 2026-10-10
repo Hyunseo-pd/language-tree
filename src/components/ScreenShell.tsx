@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type ScreenShellProps = PropsWithChildren<{
@@ -15,7 +15,13 @@ export function ScreenShell({ title, subtitle, children }: ScreenShellProps) {
           <Text style={styles.title}>{title}</Text>
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
-        <View style={styles.content}>{children}</View>
+        <ScrollView
+          style={styles.scroller}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -44,7 +50,11 @@ const styles = StyleSheet.create({
     color: "#666666",
     fontSize: 16,
   },
+  scroller: {
+    flex: 1,
+  },
   content: {
     gap: 12,
+    paddingBottom: 24,
   },
 });
