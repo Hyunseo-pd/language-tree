@@ -4,8 +4,6 @@ import { subscribeToLanguages, type LanguageFolder } from "@/lib/languageStore";
 import { Link, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, useState } from "react";
 
-const languages: LanguageFolder[] = [];
-
 export default function LanguagesHomeScreen() {
   const { languageId, languageName } = useLocalSearchParams<{
       languageId: string;

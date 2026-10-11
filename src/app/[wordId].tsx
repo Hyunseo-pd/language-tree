@@ -102,7 +102,15 @@ export default function WordCardScreen() {
 
           <View style={styles.headerActions}>
             <IconButton label="Delete word" icon="-" />
-            <Link href={`/${wordId}/edit` as Href} asChild>
+            <Link
+              href={
+                {
+                  pathname: "/[wordId]/edit",
+                  params: { wordId, languageId },
+                } as Href
+              }
+              asChild
+            >
               <IconButton label="Edit word" icon="+" />
             </Link>
           </View>
