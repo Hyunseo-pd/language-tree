@@ -1,14 +1,35 @@
-import { Link, type Href } from "expo-router";
-
-import { NavButton } from "@/components/NavButton";
+import { Folder } from "@/components/Folder";
 import { ScreenShell } from "@/components/ScreenShell";
+import { subscribeToLanguages, type LanguageFolder } from "@/lib/languageStore";
+import { Link, useLocalSearchParams, type Href } from "expo-router";
+import { useEffect, useState } from "react";
 
-const languages = [
-  { id: "germanwords", name: "German" },
-  { id: "japanesewords", name: "Japanese" },
-];
+const languages: LanguageFolder[] = [];
 
 export default function LanguagesHomeScreen() {
+  const { languageId, languageName } = useLocalSearchParams<{
+      languageId: string;
+      languageName?: string;
+    }>();
+  const [languages, setLanguages] = useState<LanguageFolder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+ 
+  useEffect(() => {
+    const unsubscribe = subscribeToLanguages(
+      (nextLanguages) => {
+        setLanguages(nextLanguages);
+        setIsLoading(false);
+        setErrorMessage(null);
+      },
+      (error) => {
+        setErrorMessage(error.message);
+        setIsLoading(false);
+      },
+    );
+
+    return unsubscribe;
+  }, [languageId]);
   return (
     <ScreenShell title="언어 목록" subtitle="단어장을 선택하세요">
       {languages.map((language) => (
@@ -21,7 +42,10 @@ export default function LanguagesHomeScreen() {
           }
           asChild
         >
-          <NavButton label={language.name} />
+          <Folder label={language.name}
+          wordCount={24}
+          onRename={() => console.log("이름 변경")}
+  onDelete={() => console.log("삭제")} />
         </Link>
       ))}
     </ScreenShell>

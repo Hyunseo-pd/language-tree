@@ -23,12 +23,15 @@ export function subscribeToLanguages(
   onSuccess: SnapshotSuccess<LanguageFolder>,
   onError: SnapshotError,
 ) {
-  onSuccess([
-    { id: "germanwords", name: "독일어" },
-    { id: "japanesewords", name: "일본어" },
-  ]);
 
-  return () => {};
+  return onSnapshot(
+    collection(db, "languages"),
+    (snapshot) => {
+      const languages = snapshot.docs.map((doc) => toLanguageFolder(doc.id, doc.data()));
+      onSuccess(languages);
+    },
+    onError
+  );
 }
 
 export function subscribeToWords(
@@ -47,6 +50,15 @@ export function subscribeToWords(
     },
     onError,
   );
+}
+
+function toLanguageFolder(id: string, data: DocumentData): LanguageFolder {
+  return {
+    id,
+    name: getString(data.name) ?? id,
+    description: getString(data.description),
+    wordCount: typeof data.wordCount === "number" ? data.wordCount : undefined,
+  };
 }
 
 function toWordItem(id: string, data: DocumentData): WordItem {
