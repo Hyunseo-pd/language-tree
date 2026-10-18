@@ -1,4 +1,4 @@
-import { collection, onSnapshot, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { collection, getCountFromServer, getDocs, onSnapshot, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
@@ -19,19 +19,15 @@ export type WordItem = {
 type SnapshotSuccess<T> = (items: T[]) => void;
 type SnapshotError = (error: FirestoreError) => void;
 
-export function subscribeToLanguages(
-  onSuccess: SnapshotSuccess<LanguageFolder>,
-  onError: SnapshotError,
-) {
+export async function getLanguages(): Promise<LanguageFolder[]> {
+  const snapshot = await getDocs(collection(db, "languages"));
 
-  return onSnapshot(
-    collection(db, "languages"),
-    (snapshot) => {
-      const languages = snapshot.docs.map((doc) => toLanguageFolder(doc.id, doc.data()));
-      onSuccess(languages);
-    },
-    onError
-  );
+  return Promise.all(snapshot.docs.map(async (doc) => {
+    const language = toLanguageFolder(doc.id, doc.data());
+    const countSnapshot = await getCountFromServer(collection(db, language.id));
+
+    return { ...language, wordCount: countSnapshot.data().count };
+  }));
 }
 
 export function subscribeToWords(
