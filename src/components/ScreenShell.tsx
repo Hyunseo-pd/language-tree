@@ -6,20 +6,21 @@ type ScreenShellProps = PropsWithChildren<{
   title: string;
   subtitle?: string;
   headerLeft?: ReactNode;
+  headerRight?: ReactNode;
 }>;
 
-export function ScreenShell({ title, subtitle, headerLeft, children }: ScreenShellProps) {
+export function ScreenShell({ title, subtitle, headerLeft, headerRight, children }: ScreenShellProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          {headerLeft ? (
+          {headerLeft || headerRight ? (
             <View style={styles.headerRow}>
               <View style={styles.headerSide}>{headerLeft}</View>
               <Text style={[styles.title, styles.centeredTitle]} numberOfLines={1}>
                 {title}
               </Text>
-              <View style={styles.headerSide} />
+              <View style={styles.headerSide}>{headerRight}</View>
             </View>
           ) : <Text style={styles.title}>{title}</Text>}
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}

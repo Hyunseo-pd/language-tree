@@ -51,7 +51,7 @@ export default function WordCardScreen() {
     0,
     words.findIndex((word) => word.id === wordId),
   );
-  const index = words.length === 0 ? 0 : (selectedIndex + indexOffset + words.length) % words.length;
+  const index = words.length === 0 ? 0 : ((selectedIndex + indexOffset) % words.length + words.length) % words.length;
   const currentWord = words[index];
 
   function showPrevious() {
@@ -93,18 +93,16 @@ export default function WordCardScreen() {
           </Text>
 
           <View style={styles.headerActions}>
-            <IconButton label="Delete word" icon="-" />
             <Link
-              push
               href={
                 {
                   pathname: "/[wordId]/edit",
-                  params: { wordId, languageId },
+                  params: { wordId: currentWord?.id ?? wordId, languageId },
                 } as Href
               }
               asChild
             >
-              <IconButton label="Edit word" icon="+" />
+              <Pressable accessibilityRole="button" accessibilityLabel={"\uB2E8\uC5B4 \uD3B8\uC9D1"} disabled={!currentWord} style={styles.editButton}><Text style={styles.editLabel}>{"\uD3B8\uC9D1"}</Text></Pressable>
             </Link>
           </View>
         </View>
@@ -198,6 +196,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 58,
     justifyContent: "space-between",
+  },
+  editButton: {
+    minHeight: 44,
+    minWidth: 52,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: "#f1f3f5",
+  },
+  editLabel: {
+    color: "#111111",
+    fontSize: 15,
+    fontWeight: "600",
   },
   headerActions: {
     flexDirection: "row",

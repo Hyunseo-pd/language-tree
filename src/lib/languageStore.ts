@@ -1,4 +1,4 @@
-import { collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, Timestamp, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
@@ -35,6 +35,30 @@ export async function getLanguages(): Promise<LanguageFolder[]> {
 
     return { ...language, wordCount: countSnapshot.data().count };
   }));
+}
+
+export async function getWord(languageId: string, wordId: string): Promise<WordItem | null> {
+  const snapshot = await getDoc(doc(db, languageId, wordId));
+  return snapshot.exists() ? toWordItem(snapshot.id, snapshot.data()) : null;
+}
+
+export async function updateWord(
+  languageId: string,
+  wordId: string,
+  values: Pick<WordItem, "word" | "meaning" | "example">,
+): Promise<void> {
+  const word = values.word.trim();
+  const meaning = values.meaning.trim();
+  if (!word || !meaning) {
+    throw new Error("Word and meaning are required.");
+  }
+
+  await updateDoc(doc(db, languageId, wordId), {
+    word,
+    meaning,
+    example: values.example?.trim() ?? "",
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export function subscribeToWords(

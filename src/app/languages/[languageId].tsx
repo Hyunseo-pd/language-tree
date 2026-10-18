@@ -1,4 +1,4 @@
-import { Link, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
+import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
@@ -69,6 +69,11 @@ export default function LanguageWordsScreen() {
     };
   }, [languageId]));
 
+  const firstAlphabeticalWord = useMemo(() => [...words].sort((a, b) =>
+    a.word.localeCompare(b.word, undefined, { sensitivity: "base" })
+      || a.id.localeCompare(b.id),
+  )[0], [words]);
+
   const title = (language?.id === languageId ? language.name : undefined)
     ?? languageName ?? "단어 목록";
 
@@ -89,6 +94,23 @@ export default function LanguageWordsScreen() {
             </View>
           </Pressable>
         </Link>
+      }
+      headerRight={
+        <Pressable
+          accessibilityRole="button"
+          disabled={isLoading || !firstAlphabeticalWord}
+          style={[styles.headerButton, (isLoading || !firstAlphabeticalWord) && { opacity: 0.4 }]}
+          onPress={() => {
+            if (firstAlphabeticalWord) {
+              router.navigate({
+                pathname: "/[wordId]",
+                params: { wordId: firstAlphabeticalWord.id, languageId },
+              } as Href);
+            }
+          }}
+        >
+          <Text style={styles.headerLabel}>{"\uCE74\uB4DC"}</Text>
+        </Pressable>
       }
     >
       <View style={styles.sortControls}>
@@ -128,7 +150,7 @@ export default function LanguageWordsScreen() {
           key={word.id}
           href={
             {
-              pathname: "/[wordId]",
+              pathname: "/[wordId]/edit",
               params: { wordId: word.id, languageId },
             } as Href
           }
@@ -161,6 +183,8 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: "#111111",
   },
+  headerButton: { minWidth: 52, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: "#f3f4f6" },
+  headerLabel: { fontSize: 15, fontWeight: "600", color: "#17212f" },
   sortControls: {
     flexDirection: "row",
     flexWrap: "wrap",
