@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -13,16 +13,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { subscribeToWords, type WordItem } from "@/lib/languageStore";
 
-const sampleWords: WordItem[] = [
-  { id: "1", word: "streben", meaning: "to strive, to pursue" },
-  { id: "2", word: "lernen", meaning: "to learn" },
-  { id: "3", word: "wachsen", meaning: "to grow" },
-];
-
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
     wordId?: string;
-    languageId?: string;
+   languageId?: string;
   }>();
   const [firebaseWords, setFirebaseWords] = useState<WordItem[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(languageId));
@@ -51,10 +45,7 @@ export default function WordCardScreen() {
     return unsubscribe;
   }, [languageId]);
 
-  const words = useMemo(
-    () => (languageId ? firebaseWords : sampleWords),
-    [firebaseWords, languageId],
-  );
+  const words = firebaseWords;
 
   const selectedIndex = Math.max(
     0,
