@@ -39,6 +39,7 @@ export default function LanguagesHomeScreen() {
     <ScreenShell title="언어 목록" subtitle={errorMessage ?? (isLoading ? "불러오는 중..." : "단어장을 선택하세요")}>
       {languages.map((language) => (
         <Link
+          push
           key={language.id}
           href={
             `/languages/${encodeURIComponent(language.id)}?languageName=${encodeURIComponent(

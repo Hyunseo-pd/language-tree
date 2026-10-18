@@ -54,7 +54,7 @@ export default function LanguageWordsScreen() {
     <ScreenShell
       title={title}
       headerLeft={
-        <Link href="/" asChild>
+        <Link href="/" dismissTo asChild>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="언어 목록 메뉴"
@@ -102,6 +102,7 @@ export default function LanguageWordsScreen() {
 
       {sortedWords.map((word) => (
         <Link
+          push
           key={word.id}
           href={
             {

@@ -8,6 +8,7 @@ export default function WordEditScreen() {
   return (
     <ScreenShell title="단어 편집" subtitle={wordId}>
       <Link
+        dismissTo
         href={
           {
             pathname: "/[wordId]",
@@ -19,6 +20,7 @@ export default function WordEditScreen() {
         <NavButton label="단어 카드" />
       </Link>
       <Link
+        dismissTo
         href={
           languageId
             ? (`/languages/${encodeURIComponent(languageId)}` as Href)

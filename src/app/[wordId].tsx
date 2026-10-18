@@ -77,6 +77,7 @@ export default function WordCardScreen() {
       <View style={styles.screen}>
         <View style={styles.header}>
           <Link
+            dismissTo
             href={
               languageId
                 ? (`/languages/${encodeURIComponent(languageId)}` as Href)
@@ -94,6 +95,7 @@ export default function WordCardScreen() {
           <View style={styles.headerActions}>
             <IconButton label="Delete word" icon="-" />
             <Link
+              push
               href={
                 {
                   pathname: "/[wordId]/edit",
