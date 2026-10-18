@@ -1,6 +1,6 @@
 import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { NavButton } from "@/components/NavButton";
 import { ScreenShell } from "@/components/ScreenShell";
@@ -11,6 +11,7 @@ export default function LanguageWordsScreen() {
     languageId: string;
     languageName?: string;
   }>();
+  const [sortOrder, setSortOrder] = useState<"alphabetical" | "date">("alphabetical");
   const [words, setWords] = useState<WordItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -32,6 +33,21 @@ export default function LanguageWordsScreen() {
     return unsubscribe;
   }, [languageId]);
 
+  const sortedWords = useMemo(() => [...words].sort((a, b) => {
+    if (sortOrder === "date") {
+      const aDate = a.savedAt ?? a.createdAt;
+      const bDate = b.savedAt ?? b.createdAt;
+      if (aDate === undefined && bDate !== undefined) return 1;
+      if (aDate !== undefined && bDate === undefined) return -1;
+      if (aDate !== undefined && bDate !== undefined && aDate !== bDate) {
+        return bDate - aDate;
+      }
+    }
+
+    return a.word.localeCompare(b.word, undefined, { sensitivity: "base" })
+      || a.id.localeCompare(b.id);
+  }), [words, sortOrder]);
+
   const title = languageName ?? languageId;
 
   return (
@@ -39,6 +55,24 @@ export default function LanguageWordsScreen() {
        <Link href="/" asChild>
         <NavButton label="언어목록" />
       </Link>
+      <View style={styles.sortControls}>
+        {([
+          { value: "alphabetical", label: "알파벳순" },
+          { value: "date", label: "날짜순 (최신순)" },
+        ] as const).map((option) => (
+          <Pressable
+            key={option.value}
+            accessibilityRole="button"
+            accessibilityState={{ selected: sortOrder === option.value }}
+            onPress={() => setSortOrder(option.value)}
+            style={[styles.sortButton, sortOrder === option.value && styles.sortButtonSelected]}
+          >
+            <Text style={[styles.sortLabel, sortOrder === option.value && styles.sortLabelSelected]}>
+              {option.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
       {isLoading ? (
         <View style={styles.centerState}>
           <ActivityIndicator />
@@ -52,7 +86,7 @@ export default function LanguageWordsScreen() {
         <Text style={styles.stateText}>No items found in this language.</Text>
       ) : null}
 
-      {words.map((word) => (
+      {sortedWords.map((word) => (
         <Link
           key={word.id}
           href={
@@ -75,6 +109,32 @@ export default function LanguageWordsScreen() {
 }
 
 const styles = StyleSheet.create({
+  sortControls: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  sortButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#cccccc",
+  },
+  sortButtonSelected: {
+    backgroundColor: "#111111",
+    borderColor: "#111111",
+  },
+  sortLabel: {
+    color: "#444444",
+    fontSize: 14,
+  },
+  sortLabelSelected: {
+    color: "#ffffff",
+    fontWeight: "600",
+  },
   centerState: {
     alignItems: "center",
     gap: 10,

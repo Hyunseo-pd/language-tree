@@ -1,4 +1,4 @@
-import { collection, getCountFromServer, getDocs, onSnapshot, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { collection, getCountFromServer, getDocs, onSnapshot, Timestamp, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
@@ -14,6 +14,8 @@ export type WordItem = {
   word: string;
   meaning: string;
   example?: string;
+  createdAt?: number;
+  savedAt?: number;
 };
 
 type SnapshotSuccess<T> = (items: T[]) => void;
@@ -63,6 +65,8 @@ function toWordItem(id: string, data: DocumentData): WordItem {
     word: getString(data.word) ?? getString(data.term) ?? id,
     meaning: getString(data.meaning) ?? getString(data.definition) ?? "",
     example: getString(data.example),
+    createdAt: getTimestampMillis(data.createdAt),
+    savedAt: getTimestampMillis(data.savedAt),
   };
 }
 
@@ -70,3 +74,19 @@ function getString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 
+
+function getTimestampMillis(value: unknown): number | undefined {
+  const milliseconds = value instanceof Timestamp
+    ? value.toMillis()
+    : value instanceof Date
+      ? value.getTime()
+      : typeof value === "string"
+        ? Date.parse(value)
+        : typeof value === "number"
+          ? value
+          : undefined;
+
+  return milliseconds !== undefined && Number.isFinite(milliseconds)
+    ? milliseconds
+    : undefined;
+}
