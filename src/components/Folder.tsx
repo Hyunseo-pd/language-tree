@@ -1,5 +1,4 @@
 import { Pressable, PressableProps, StyleSheet, Text, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 type FolderProps = PressableProps & {
   label: string;
@@ -29,8 +28,15 @@ export function Folder({ label, wordCount, style, onRename, onDelete, ...props }
     );
   }
   return (
-     <GestureHandlerRootView style={{ flex: 1 }}>
-    <ReanimatedSwipeable renderRightActions={renderActions}>
+    <ReanimatedSwipeable
+      renderRightActions={renderActions}
+      friction={1}
+      rightThreshold={48}
+      dragOffsetFromRightEdge={16}
+      overshootLeft={false}
+      overshootRight={false}
+      childrenContainerStyle={styles.foreground}
+    >
     <Pressable
       accessibilityRole="button"
       style={(state) => [
@@ -46,11 +52,13 @@ export function Folder({ label, wordCount, style, onRename, onDelete, ...props }
       )}
     </Pressable>
     </ReanimatedSwipeable>
-    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  foreground: {
+    backgroundColor: "#ffffff",
+  },
   button: {
     alignItems: "flex-start",
     borderBottomWidth: 1,
@@ -73,6 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   actions: {
+    width: 160,
     flexDirection: "row",
   },
    actionButton: {
