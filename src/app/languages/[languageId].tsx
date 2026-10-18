@@ -156,7 +156,7 @@ export default function LanguageWordsScreen() {
           }
           asChild
         >
-          <NavButton label={word.meaning ? `${word.word} - ${word.meaning}` : word.word} />
+          <NavButton label={word.meaning ? `${word.word}` : word.word} />
         </Link>
       ))}
     </ScreenShell>

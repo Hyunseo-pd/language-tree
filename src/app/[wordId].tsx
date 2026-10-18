@@ -205,11 +205,11 @@ function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean 
     <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Animated.View style={[styles.cardFace, frontStyle]}>
         <Text style={styles.word}>{word.word}</Text>
-        <Text style={styles.hint}>Tap to see meaning</Text>
+        <Text style={styles.hint}>터치해서 뜻 보기</Text>
       </Animated.View>
       <Animated.View style={[styles.cardFace, backStyle]}>
         <Text style={styles.word}>{word.meaning}</Text>
-        <Text style={styles.hint}>Tap to see word</Text>
+        <Text style={styles.hint}>터치해서 단어 보기</Text>
       </Animated.View>
     </View>
   );

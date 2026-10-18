@@ -22,10 +22,9 @@ export function NavButton({ label, style, ...props }: NavButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    alignItems: "center",
-    borderColor: "#111111",
-    borderRadius: 8,
-    borderWidth: 1,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderColor: "#CCCCCC",
     justifyContent: "center",
     minHeight: 52,
     paddingHorizontal: 16,
