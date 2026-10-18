@@ -6,9 +6,9 @@ import {
   StyleSheet,
   Text,
   View,
-  type PressableProps,
-  type ViewStyle,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { subscribeToWords, type WordItem } from "@/lib/languageStore";
@@ -72,6 +72,27 @@ export default function WordCardScreen() {
     setIndexOffset((prev) => prev + 1);
   }
 
+  const canInteract = Boolean(currentWord) && !isLoading && !errorMessage;
+  const swipeGesture = Gesture.Pan()
+    .enabled(canInteract)
+    .activeOffsetX([-16, 16])
+    .failOffsetY([-24, 24])
+    .maxPointers(1)
+    .runOnJS(true)
+    .onEnd((event) => {
+      if (Math.abs(event.translationX) < 48
+        || Math.abs(event.translationX) <= Math.abs(event.translationY)) return;
+      if (event.translationX < 0) showNext();
+      else showPrevious();
+    });
+  const tapGesture = Gesture.Tap()
+    .enabled(canInteract)
+    .maxDistance(12)
+    .runOnJS(true)
+    .onEnd((_event, success) => {
+      if (success) setShowMeaning((previous) => !previous);
+    });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
@@ -120,14 +141,24 @@ export default function WordCardScreen() {
           </View>
         </View>
 
-        <View style={styles.card}>
-          <IconButton
-            label="Previous word"
-            icon="<"
-            style={styles.cardArrowLeft}
-            onPress={showPrevious}
-          />
-
+        <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
+        <View
+          style={styles.card}
+          accessible
+          accessibilityLabel={currentWord ? (showMeaning ? currentWord.meaning : currentWord.word) : "No word"}
+          accessibilityHint="Tap anywhere to flip the word. Swipe left or right to change words."
+          accessibilityActions={canInteract ? [
+            { name: "activate", label: "Flip word" },
+            { name: "increment", label: "Next word" },
+            { name: "decrement", label: "Previous word" },
+          ] : []}
+          onAccessibilityAction={(event) => {
+            if (!canInteract) return;
+            if (event.nativeEvent.actionName === "activate") setShowMeaning((previous) => !previous);
+            if (event.nativeEvent.actionName === "increment") showNext();
+            if (event.nativeEvent.actionName === "decrement") showPrevious();
+          }}
+        >
           {isLoading ? (
             <View style={styles.centerState}>
               <ActivityIndicator />
@@ -141,47 +172,46 @@ export default function WordCardScreen() {
             <Text style={styles.stateText}>No items found.</Text>
           ) : null}
 
-          {currentWord ? (
-            <Pressable onPress={() => setShowMeaning((prev) => !prev)}>
-              <Text style={styles.word}>{showMeaning ? currentWord.meaning : currentWord.word}</Text>
-              <Text style={styles.hint}>{showMeaning ? "Tap to see word" : "Tap to see meaning"}</Text>
-            </Pressable>
+          {currentWord && !isLoading && !errorMessage ? (
+            <FlipCard key={currentWord.id} word={currentWord} showMeaning={showMeaning} />
           ) : null}
 
-          <IconButton
-            label="Next word"
-            icon=">"
-            style={styles.cardArrowRight}
-            onPress={showNext}
-          />
-
         </View>
+        </GestureDetector>
 
-        <View style={styles.footer}>
-          <IconButton label="Previous" icon="<" onPress={showPrevious} />
-          <IconButton label="Next" icon=">" onPress={showNext} />
-        </View>
+        <View style={styles.footer} />
       </View>
     </SafeAreaView>
   );
 }
 
-type IconButtonProps = PressableProps & {
-  icon: string;
-  label: string;
-  style?: ViewStyle;
-};
+function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean }) {
+  const rotation = useSharedValue(0);
 
-function IconButton({ icon, label, style, ...props }: IconButtonProps) {
+  useEffect(() => {
+    rotation.value = withTiming(showMeaning ? 180 : 0, { duration: 320 });
+  }, [showMeaning, rotation]);
+
+  const frontStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1200 }, { rotateY: `${rotation.value}deg` }],
+    opacity: rotation.value > 90 ? 0 : 1,
+  }));
+  const backStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1200 }, { rotateY: `${rotation.value + 180}deg` }],
+    opacity: rotation.value > 90 ? 1 : 0,
+  }));
+
   return (
-    <Pressable
-      accessibilityLabel={label}
-      accessibilityRole="button"
-      style={[styles.iconButton, style]}
-      {...props}
-    >
-      <Text style={styles.icon}>{icon}</Text>
-    </Pressable>
+    <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <Animated.View style={[styles.cardFace, frontStyle]}>
+        <Text style={styles.word}>{word.word}</Text>
+        <Text style={styles.hint}>Tap to see meaning</Text>
+      </Animated.View>
+      <Animated.View style={[styles.cardFace, backStyle]}>
+        <Text style={styles.word}>{word.meaning}</Text>
+        <Text style={styles.hint}>Tap to see word</Text>
+      </Animated.View>
+    </View>
   );
 }
 
@@ -234,13 +264,13 @@ const styles = StyleSheet.create({
     marginTop: 14,
     position: "relative",
   },
-  cardArrowLeft: {
-    left: 8,
-    position: "absolute",
-  },
-  cardArrowRight: {
-    position: "absolute",
-    right: 8,
+  cardFace: {
+    position: "absolute", top: 0, right: 0, bottom: 0, left: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    backgroundColor: "#ffffff",
+    backfaceVisibility: "hidden",
   },
   word: {
     color: "#000000",
@@ -288,12 +318,6 @@ const styles = StyleSheet.create({
     height: 52,
     justifyContent: "center",
     minWidth: 52,
-  },
-  icon: {
-    color: "#000000",
-    fontSize: 48,
-    fontWeight: "700",
-    lineHeight: 52,
   },
   centerState: {
     alignItems: "center",
