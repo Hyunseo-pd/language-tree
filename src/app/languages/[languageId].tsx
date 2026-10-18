@@ -51,10 +51,24 @@ export default function LanguageWordsScreen() {
   const title = languageName ?? languageId;
 
   return (
-    <ScreenShell title={title} subtitle="List">
-       <Link href="/" asChild>
-        <NavButton label="언어목록" />
-      </Link>
+    <ScreenShell
+      title={title}
+      headerLeft={
+        <Link href="/" asChild>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="언어 목록 메뉴"
+            style={({ pressed }) => [styles.menuButton, pressed && styles.menuButtonPressed]}
+          >
+            <View style={styles.menuIcon}>
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+              <View style={styles.menuLine} />
+            </View>
+          </Pressable>
+        </Link>
+      }
+    >
       <View style={styles.sortControls}>
         {([
           { value: "alphabetical", label: "알파벳순" },
@@ -100,15 +114,30 @@ export default function LanguageWordsScreen() {
           <NavButton label={word.meaning ? `${word.word} - ${word.meaning}` : word.word} />
         </Link>
       ))}
-
-      <Link href="/" asChild>
-        <NavButton label="언어목록" />
-      </Link>
     </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
+  menuButton: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+  },
+  menuButtonPressed: {
+    backgroundColor: "#eeeeee",
+  },
+  menuIcon: {
+    gap: 5,
+  },
+  menuLine: {
+    width: 22,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#111111",
+  },
   sortControls: {
     flexDirection: "row",
     flexWrap: "wrap",
