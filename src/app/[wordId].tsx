@@ -85,7 +85,20 @@ export default function WordCardScreen() {
             }
             asChild
           >
-            <IconButton label="Back to list" icon="<" />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={"\uB2E8\uC5B4 \uBAA9\uB85D\uC73C\uB85C"}
+              style={styles.iconButton}
+            >
+              <View style={styles.listIcon}>
+                {[0, 1, 2].map((row) => (
+                  <View key={row} style={styles.listIconRow}>
+                    <View style={styles.listIconDot} />
+                    <View style={styles.listIconLine} />
+                  </View>
+                ))}
+              </View>
+            </Pressable>
           </Link>
 
           <Text style={styles.counter}>
@@ -142,18 +155,10 @@ export default function WordCardScreen() {
             onPress={showNext}
           />
 
-          <Pressable accessibilityRole="button" style={styles.exampleButton}>
-            <Text style={styles.exampleText}>Generate example</Text>
-          </Pressable>
         </View>
 
         <View style={styles.footer}>
           <IconButton label="Previous" icon="<" onPress={showPrevious} />
-          <IconButton label="Favorite" icon="*" />
-          <View style={styles.sortGroup}>
-            <IconButton label="Sort" icon="=" />
-            <Text style={styles.sortText}>Sort</Text>
-          </View>
           <IconButton label="Next" icon=">" onPress={showNext} />
         </View>
       </View>
@@ -251,17 +256,6 @@ const styles = StyleSheet.create({
     color: "#888888",
     textAlign: "center",
   },
-  exampleButton: {
-    marginTop: 210,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  exampleText: {
-    color: "#00a950",
-    fontSize: 24,
-    fontWeight: "700",
-    textDecorationLine: "underline",
-  },
   footer: {
     alignItems: "center",
     flexDirection: "row",
@@ -269,15 +263,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 12,
   },
-  sortGroup: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
+  listIcon: {
+    gap: 5,
   },
-  sortText: {
-    color: "#000000",
-    fontSize: 28,
-    fontWeight: "500",
+  listIconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  listIconDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "#111111",
+  },
+  listIconLine: {
+    width: 19,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#111111",
   },
   iconButton: {
     alignItems: "center",
