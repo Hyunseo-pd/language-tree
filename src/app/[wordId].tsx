@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { subscribeToWords, type WordItem } from "@/lib/languageStore";
@@ -23,6 +23,27 @@ export default function WordCardScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [indexOffset, setIndexOffset] = useState(0);
   const [showMeaning, setShowMeaning] = useState(false);
+  const [transition, setTransition] = useState<{ direction: number; sequence: number } | null>(null);
+  const slideX = useSharedValue(0);
+  const cardWidth = useSharedValue(360);
+  const transitioning = useSharedValue(false);
+
+  const slideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideX.value }],
+  }));
+
+  useLayoutEffect(() => {
+    if (!transition) return;
+    // The incoming preview is already centered. Rebase after the new word renders.
+    slideX.set(0);
+    transitioning.set(false);
+  }, [transition, slideX, cardWidth, transitioning]);
+
+  function completeSwipe(direction: number) {
+    setShowMeaning(false);
+    setIndexOffset((previous) => previous + (direction < 0 ? 1 : -1));
+    setTransition((previous) => ({ direction, sequence: (previous?.sequence ?? 0) + 1 }));
+  }
 
   useEffect(() => {
     if (!languageId) {
@@ -53,6 +74,14 @@ export default function WordCardScreen() {
   );
   const index = words.length === 0 ? 0 : ((selectedIndex + indexOffset) % words.length + words.length) % words.length;
   const currentWord = words[index];
+  const previousWord = words.length ? words[(index - 1 + words.length) % words.length] : undefined;
+  const nextWord = words.length ? words[(index + 1) % words.length] : undefined;
+  const previousStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideX.value - (cardWidth.value + 16) }],
+  }));
+  const nextStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideX.value + cardWidth.value + 16 }],
+  }));
 
   function showPrevious() {
     if (words.length === 0) {
@@ -78,19 +107,39 @@ export default function WordCardScreen() {
     .activeOffsetX([-16, 16])
     .failOffsetY([-24, 24])
     .maxPointers(1)
-    .runOnJS(true)
+    .onUpdate((event) => {
+      if (!transitioning.value) {
+        const limit = cardWidth.value + 16;
+        slideX.set(Math.max(-limit, Math.min(limit, event.translationX)));
+      }
+    })
     .onEnd((event) => {
-      if (Math.abs(event.translationX) < 48
-        || Math.abs(event.translationX) <= Math.abs(event.translationY)) return;
-      if (event.translationX < 0) showNext();
-      else showPrevious();
+      if (transitioning.value) return;
+      const distance = Math.abs(event.translationX);
+      const horizontal = distance > Math.abs(event.translationY);
+      const committed = horizontal && (distance >= Math.min(96, cardWidth.value * 0.25)
+        || (distance >= 24 && Math.abs(event.velocityX) >= 700
+          && event.translationX * event.velocityX > 0));
+      if (!committed) {
+        slideX.set(withTiming(0, { duration: 180 }));
+        return;
+      }
+      const direction = event.translationX < 0 ? -1 : 1;
+      transitioning.set(true);
+      slideX.set(withTiming(direction * (cardWidth.get() + 16), { duration: 160 }, (finished) => {
+        if (finished) runOnJS(completeSwipe)(direction);
+        else transitioning.set(false);
+      }));
+    })
+    .onFinalize((_event, success) => {
+      if (!success && !transitioning.value) slideX.set(withTiming(0, { duration: 180 }));
     });
   const tapGesture = Gesture.Tap()
     .enabled(canInteract)
     .maxDistance(12)
     .runOnJS(true)
     .onEnd((_event, success) => {
-      if (success) setShowMeaning((previous) => !previous);
+      if (success && !transitioning.value) setShowMeaning((previous) => !previous);
     });
 
   return (
@@ -142,8 +191,23 @@ export default function WordCardScreen() {
         </View>
 
         <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
-        <View
-          style={styles.card}
+        <View style={styles.cardViewport} onLayout={(event) => { cardWidth.set(event.nativeEvent.layout.width); }}>
+        {canInteract && previousWord && nextWord ? (
+          <>
+            <Animated.View style={[styles.card, styles.previewCard, previousStyle]} pointerEvents="none"
+              accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <Text style={styles.word}>{previousWord.word}</Text>
+              <Text style={styles.hint}>{"\uD130\uCE58\uD574\uC11C \uB73B \uBCF4\uAE30"}</Text>
+            </Animated.View>
+            <Animated.View style={[styles.card, styles.previewCard, nextStyle]} pointerEvents="none"
+              accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <Text style={styles.word}>{nextWord.word}</Text>
+              <Text style={styles.hint}>{"\uD130\uCE58\uD574\uC11C \uB73B \uBCF4\uAE30"}</Text>
+            </Animated.View>
+          </>
+        ) : null}
+        <Animated.View
+          style={[styles.card, slideStyle]}
           accessible
           accessibilityLabel={currentWord ? (showMeaning ? currentWord.meaning : currentWord.word) : "No word"}
           accessibilityHint="Tap anywhere to flip the word. Swipe left or right to change words."
@@ -176,6 +240,7 @@ export default function WordCardScreen() {
             <FlipCard key={currentWord.id} word={currentWord} showMeaning={showMeaning} />
           ) : null}
 
+        </Animated.View>
         </View>
         </GestureDetector>
 
@@ -254,6 +319,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "400",
   },
+  cardViewport: {
+    flex: 1,
+    marginTop: 14,
+    overflow: "hidden",
+  },
   card: {
     alignItems: "center",
     borderColor: "#8f8f8f",
@@ -261,8 +331,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flex: 1,
     justifyContent: "center",
-    marginTop: 14,
     position: "relative",
+  },
+  previewCard: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "#ffffff",
   },
   cardFace: {
     position: "absolute", top: 0, right: 0, bottom: 0, left: 0,
