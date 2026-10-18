@@ -1,4 +1,4 @@
-import { collection, getCountFromServer, getDocs, onSnapshot, Timestamp, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, Timestamp, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
@@ -20,6 +20,11 @@ export type WordItem = {
 
 type SnapshotSuccess<T> = (items: T[]) => void;
 type SnapshotError = (error: FirestoreError) => void;
+
+export async function getLanguageName(languageId: string): Promise<string | undefined> {
+  const snapshot = await getDoc(doc(db, "languages", languageId));
+  return snapshot.exists() ? getString(snapshot.data().name) : undefined;
+}
 
 export async function getLanguages(): Promise<LanguageFolder[]> {
   const snapshot = await getDocs(collection(db, "languages"));

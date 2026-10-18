@@ -1,16 +1,17 @@
-import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { Link, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { NavButton } from "@/components/NavButton";
 import { ScreenShell } from "@/components/ScreenShell";
-import { subscribeToWords, type WordItem } from "@/lib/languageStore";
+import { getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
 
 export default function LanguageWordsScreen() {
   const { languageId, languageName } = useLocalSearchParams<{
     languageId: string;
     languageName?: string;
   }>();
+  const [language, setLanguage] = useState<{ id: string; name: string } | null>(null);
   const [sortOrder, setSortOrder] = useState<"alphabetical" | "date">("alphabetical");
   const [words, setWords] = useState<WordItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +49,28 @@ export default function LanguageWordsScreen() {
       || a.id.localeCompare(b.id);
   }), [words, sortOrder]);
 
-  const title = languageName ?? languageId;
+  useFocusEffect(useCallback(() => {
+    let isActive = true;
+
+    getLanguageName(languageId)
+      .then((name) => {
+        if (isActive) {
+          setLanguage({ id: languageId, name: name ?? "단어 목록" });
+        }
+      })
+      .catch((error: unknown) => {
+        if (isActive) {
+          setErrorMessage(error instanceof Error ? error.message : "Failed to load language name.");
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [languageId]));
+
+  const title = (language?.id === languageId ? language.name : undefined)
+    ?? languageName ?? "단어 목록";
 
   return (
     <ScreenShell
