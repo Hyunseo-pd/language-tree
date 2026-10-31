@@ -32,7 +32,7 @@ export function Folder({ label, wordCount, style, onRename, onDelete, ...props }
       renderRightActions={renderActions}
       friction={1}
       rightThreshold={48}
-      dragOffsetFromRightEdge={16}
+      dragOffsetFromRight={-16}
       overshootLeft={false}
       overshootRight={false}
       childrenContainerStyle={styles.foreground}
