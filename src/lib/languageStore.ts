@@ -1,4 +1,4 @@
-import { arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, query, where, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { normalizeWordValues, readWordDetails, uniqueFieldNames, type WordDetail, type WordValues } from "@/lib/wordFields";
@@ -36,9 +36,14 @@ export async function getLanguages(): Promise<LanguageFolder[]> {
 
   return Promise.all(snapshot.docs.map(async (doc) => {
     const language = toLanguageFolder(doc.id, doc.data());
-    const countSnapshot = await getCountFromServer(collection(db, language.id));
+    const words = collection(db, language.id);
+    const [countSnapshot, namedDocuments] = await Promise.all([
+      getCountFromServer(words),
+      getDocs(query(words, where("name", "!=", null))),
+    ]);
+    const metadataCount = namedDocuments.docs.filter((document) => !isWordData(document.data())).length;
 
-    return { ...language, wordCount: countSnapshot.data().count };
+    return { ...language, wordCount: countSnapshot.data().count - metadataCount };
   }));
 }
 
@@ -63,7 +68,9 @@ export async function renameLanguage(languageId: string, name: string): Promise<
 
 export async function getWord(languageId: string, wordId: string): Promise<WordItem | null> {
   const snapshot = await getDoc(doc(db, languageId, wordId));
-  return snapshot.exists() ? toWordItem(snapshot.id, snapshot.data()) : null;
+  return snapshot.exists() && isWordData(snapshot.data())
+    ? toWordItem(snapshot.id, snapshot.data())
+    : null;
 }
 
 // Bootstrap old field names once per folder; subsequent reads use the folder catalog.
@@ -77,7 +84,7 @@ export async function getCustomFieldNames(languageId: string): Promise<string[]>
   const words = await getDocs(collection(db, languageId));
   const discovered = uniqueFieldNames([
     ...names,
-    ...words.docs.flatMap((word) => readWordDetails(word.data()).customFields.map(({ label }) => label)),
+    ...words.docs.filter((word) => isWordData(word.data())).flatMap((word) => readWordDetails(word.data()).customFields.map(({ label }) => label)),
   ]);
   await updateDoc(reference, {
     customFieldNamesInitialized: true,
@@ -116,6 +123,7 @@ export function subscribeToWords(
     collection(db, languageId),
     (snapshot) => {
       const words = snapshot.docs
+        .filter((document) => isWordData(document.data()))
         .map((doc) => toWordItem(doc.id, doc.data()))
         .sort((a, b) => a.word.localeCompare(b.word));
 
@@ -132,6 +140,15 @@ function toLanguageFolder(id: string, data: DocumentData): LanguageFolder {
     description: getString(data.description),
     wordCount: typeof data.wordCount === "number" ? data.wordCount : undefined,
   };
+}
+
+// Legacy folders can contain name-only metadata alongside vocabulary documents.
+// Keep legacy name-based words only when they also contain a definition.
+function isWordData(data: DocumentData): boolean {
+  return Boolean(
+    getString(data.word) ?? getString(data.term)
+    ?? (getString(data.name) && (getString(data.meaning) ?? getString(data.definition))),
+  );
 }
 
 function toWordItem(id: string, data: DocumentData): WordItem {
