@@ -61,6 +61,25 @@ export async function getWord(languageId: string, wordId: string): Promise<WordI
   return snapshot.exists() ? toWordItem(snapshot.id, snapshot.data()) : null;
 }
 
+export async function createWord(
+  languageId: string,
+  values: Pick<WordItem, "word" | "meaning" | "example">,
+): Promise<string> {
+  const word = values.word.trim();
+  const meaning = values.meaning.trim();
+  if (!languageId || !word || !meaning) {
+    throw new Error("언어, 단어와 뜻을 모두 입력해 주세요.");
+  }
+  const reference = await addDoc(collection(db, languageId), {
+    word,
+    meaning,
+    example: values.example?.trim() ?? "",
+    createdAt: serverTimestamp(),
+    savedAt: serverTimestamp(),
+  });
+  return reference.id;
+}
+
 export async function updateWord(
   languageId: string,
   wordId: string,

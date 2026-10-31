@@ -113,6 +113,9 @@ export default function LanguageWordsScreen() {
         </Pressable>
       }
     >
+      <Link push href={{ pathname: "/add-word", params: { languageId } } as Href} asChild>
+        <NavButton label="＋ 단어 추가" />
+      </Link>
       <View style={styles.sortControls}>
         {([
           { value: "alphabetical", label: "알파벳순" },
