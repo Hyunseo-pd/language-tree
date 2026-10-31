@@ -8,11 +8,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { createWord, getWord, updateWord } from "@/lib/languageStore";
 
-type WordFields = { word: string; meaning: string; example: string };
+import { normalizeWordValues, optionalWordFields, type OptionalWordField, type WordDetail, type WordValues } from "@/lib/wordFields";
+
+type WordFields = Required<WordValues>;
+const emptyFields: WordFields = { word: "", meaning: "", reading: "", partOfSpeech: "", inflections: "", example: "" };
 
 export function WordEditor({ wordId, languageId }: { wordId?: string; languageId?: string }) {
-  const [fields, setFields] = useState<WordFields>({ word: "", meaning: "", example: "" });
-  const [original, setOriginal] = useState<WordFields | null>(wordId ? null : { word: "", meaning: "", example: "" });
+  const [fields, setFields] = useState<WordFields>(emptyFields);
+  const [original, setOriginal] = useState<WordFields | null>(wordId ? null : emptyFields);
+  const [selected, setSelected] = useState<OptionalWordField[]>([]);
+  const [legacyDetails, setLegacyDetails] = useState<WordDetail[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(wordId));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +41,9 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
           setError("단어를 찾을 수 없습니다.");
           return;
         }
-        const next = { word: word.word, meaning: word.meaning, example: word.example ?? "" };
+        const next: WordFields = { word: word.word, meaning: word.meaning, reading: word.reading ?? "", partOfSpeech: word.partOfSpeech ?? "", inflections: word.inflections ?? "", example: word.example ?? "" };
+        setSelected(optionalWordFields.filter(({ key }) => Boolean(next[key])).map(({ key }) => key));
+        setLegacyDetails(word.legacyDetails ?? []);
         setFields(next);
         setOriginal(next);
       })
@@ -47,8 +54,10 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
     return () => { active = false; };
   }, [languageId, wordId, reload]);
 
-  const dirty = original !== null && (fields.word !== original.word
-    || fields.meaning !== original.meaning || fields.example !== original.example);
+  const effectiveFields = { ...fields };
+  optionalWordFields.forEach(({ key }) => { if (!selected.includes(key)) effectiveFields[key] = ""; });
+  const dirty = original !== null && (Object.keys(effectiveFields) as (keyof WordFields)[])
+    .some((key) => effectiveFields[key] !== original[key]);
   const valid = Boolean(fields.word.trim() && fields.meaning.trim());
 
   function changeField(key: keyof WordFields, value: string) {
@@ -63,7 +72,7 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
     setIsSaving(true);
     setError(null);
     Keyboard.dismiss();
-    const next = { word: fields.word.trim(), meaning: fields.meaning.trim(), example: fields.example.trim() };
+    const next = normalizeWordValues(effectiveFields);
     try {
       if (wordId) {
         await updateWord(languageId, wordId, next);
@@ -108,11 +117,10 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
           ) : null}
           {!isLoading && original ? (
             <>
-              <Text style={styles.description}>단어와 뜻을 정리하고, 예문을 함께 남겨 보세요.</Text>
+              <Text style={styles.description}>단어와 뜻을 입력하고, 더 기록할 항목을 선택하세요.</Text>
               {([
                 { key: "word", label: "단어", placeholder: "단어를 입력하세요", multiline: false },
                 { key: "meaning", label: "뜻", placeholder: "뜻을 입력하세요", multiline: true },
-                { key: "example", label: "예문 (선택)", placeholder: "기억하고 싶은 예문을 남겨 보세요", multiline: true },
               ] as const).map((field) => (
                 <View key={field.key} style={styles.field}>
                   <Text style={styles.label}>{field.label}</Text>
@@ -123,6 +131,46 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
                     style={[styles.input, field.multiline && styles.multiline]} />
                 </View>
               ))}
+              <View style={styles.field}>
+                <Text style={styles.label}>추가로 기록할 항목</Text>
+                <View style={styles.options}>
+                  {optionalWordFields.map(({ key, label }) => (
+                    <Pressable key={key} accessibilityRole="checkbox"
+                      accessibilityState={{ checked: selected.includes(key), disabled: isSaving }}
+                      disabled={isSaving} onPress={() => {
+                        setSelected((previous) => previous.includes(key) ? previous.filter((item) => item !== key) : [...previous, key]);
+                        setSaved(false);
+                        setError(null);
+                      }} style={[styles.option, selected.includes(key) && styles.optionSelected]}>
+                      <Text style={[styles.optionLabel, selected.includes(key) && styles.optionLabelSelected]}>
+                        {selected.includes(key) ? "✓ " : "+ "}{label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <Text style={styles.hint}>선택한 항목만 저장됩니다. 선택을 해제하면 해당 내용은 저장 시 비워집니다.</Text>
+              </View>
+              {optionalWordFields.filter(({ key }) => selected.includes(key)).map(({ key, label, placeholder }) => (
+                <View key={key} style={styles.field}>
+                  <Text style={styles.label}>{label}</Text>
+                  <TextInput accessibilityLabel={label} value={fields[key]}
+                    onChangeText={(value) => changeField(key, value)} editable={!isSaving}
+                    placeholder={placeholder} placeholderTextColor="#9299a3"
+                    autoCapitalize="none" autoCorrect={false} multiline
+                    style={[styles.input, styles.multiline]} />
+                </View>
+              ))}
+              {legacyDetails.length ? (
+                <View style={styles.field}>
+                  <Text style={styles.label}>기존에 기록한 정보</Text>
+                  {legacyDetails.map(({ label, value }) => (
+                    <View key={label} style={styles.field}>
+                      <Text style={styles.hint}>{label}</Text>
+                      <Text style={styles.legacyValue}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
               <Text accessibilityLiveRegion="polite" style={saved ? styles.success : styles.hint}>
                 {!languageId ? "언어 목록에서 다시 선택해 주세요." : saved ? "저장했습니다." : !valid ? "단어와 뜻을 모두 입력해 주세요." : dirty ? "저장하지 않은 변경사항이 있습니다." : "변경 후 저장 버튼을 눌러 주세요."}
               </Text>
@@ -151,6 +199,12 @@ const styles = StyleSheet.create({
   loading: { marginTop: 48 },
   description: { color: "#6b7280", fontSize: 14, lineHeight: 22 },
   field: { gap: 10 },
+  options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: "#dce1e7", borderRadius: 12 },
+  optionSelected: { backgroundColor: "#17212f", borderColor: "#17212f" },
+  optionLabel: { color: "#283445", fontSize: 15 },
+  optionLabelSelected: { color: "#ffffff" },
+  legacyValue: { color: "#17212f", fontSize: 17, lineHeight: 26 },
   label: { fontSize: 15, fontWeight: "600", color: "#283445" },
   input: { borderWidth: 1, borderColor: "#dce1e7", backgroundColor: "#f8fafc", borderRadius: 14, padding: 16, minHeight: 56, fontSize: 17, color: "#17212f" },
   multiline: { minHeight: 112, textAlignVertical: "top" },

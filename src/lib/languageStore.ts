@@ -1,6 +1,7 @@
 import { addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { normalizeWordValues, readWordDetails, type WordDetail, type WordValues } from "@/lib/wordFields";
 
 export type LanguageFolder = {
   id: string;
@@ -14,6 +15,10 @@ export type WordItem = {
   word: string;
   meaning: string;
   example?: string;
+  reading?: string;
+  partOfSpeech?: string;
+  inflections?: string;
+  legacyDetails?: WordDetail[];
   createdAt?: number;
   savedAt?: number;
 };
@@ -61,44 +66,22 @@ export async function getWord(languageId: string, wordId: string): Promise<WordI
   return snapshot.exists() ? toWordItem(snapshot.id, snapshot.data()) : null;
 }
 
-export async function createWord(
-  languageId: string,
-  values: Pick<WordItem, "word" | "meaning" | "example">,
-): Promise<string> {
-  const word = values.word.trim();
-  const meaning = values.meaning.trim();
-  if (!languageId || !word || !meaning) {
-    throw new Error("언어, 단어와 뜻을 모두 입력해 주세요.");
-  }
+export async function createWord(languageId: string, values: WordValues): Promise<string> {
+  if (!languageId) throw new Error("언어 목록에서 다시 선택해 주세요.");
   const reference = await addDoc(collection(db, languageId), {
-    word,
-    meaning,
-    example: values.example?.trim() ?? "",
+    ...normalizeWordValues(values),
     createdAt: serverTimestamp(),
     savedAt: serverTimestamp(),
   });
   return reference.id;
 }
 
-export async function updateWord(
-  languageId: string,
-  wordId: string,
-  values: Pick<WordItem, "word" | "meaning" | "example">,
-): Promise<void> {
-  const word = values.word.trim();
-  const meaning = values.meaning.trim();
-  if (!word || !meaning) {
-    throw new Error("Word and meaning are required.");
-  }
-
+export async function updateWord(languageId: string, wordId: string, values: WordValues): Promise<void> {
   await updateDoc(doc(db, languageId, wordId), {
-    word,
-    meaning,
-    example: values.example?.trim() ?? "",
+    ...normalizeWordValues(values),
     updatedAt: serverTimestamp(),
   });
 }
-
 export function subscribeToWords(
   languageId: string,
   onSuccess: SnapshotSuccess<WordItem>,
@@ -129,9 +112,9 @@ function toLanguageFolder(id: string, data: DocumentData): LanguageFolder {
 function toWordItem(id: string, data: DocumentData): WordItem {
   return {
     id,
-    word: getString(data.word) ?? getString(data.term) ?? id,
+    word: getString(data.word) ?? getString(data.term) ?? getString(data.name) ?? id,
     meaning: getString(data.meaning) ?? getString(data.definition) ?? "",
-    example: getString(data.example),
+    ...readWordDetails(data),
     createdAt: getTimestampMillis(data.createdAt),
     savedAt: getTimestampMillis(data.savedAt),
   };

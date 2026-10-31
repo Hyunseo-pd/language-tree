@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -12,6 +13,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { subscribeToWords, type WordItem } from "@/lib/languageStore";
+import { getWordDetails } from "@/lib/wordFields";
 
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
@@ -209,7 +211,7 @@ export default function WordCardScreen() {
         <Animated.View
           style={[styles.card, slideStyle]}
           accessible
-          accessibilityLabel={currentWord ? (showMeaning ? currentWord.meaning : currentWord.word) : "No word"}
+          accessibilityLabel={currentWord ? (showMeaning ? [currentWord.word, currentWord.meaning, ...getWordDetails(currentWord).map(({ label, value }) => `${label}: ${value}`)].join(". ") : currentWord.word) : "No word"}
           accessibilityHint="Tap anywhere to flip the word. Swipe left or right to change words."
           accessibilityActions={canInteract ? [
             { name: "activate", label: "Flip word" },
@@ -267,14 +269,23 @@ function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean 
   }));
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Animated.View style={[styles.cardFace, frontStyle]}>
+    <View style={StyleSheet.absoluteFill} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <Animated.View style={[styles.cardFace, frontStyle]} pointerEvents={showMeaning ? "none" : "auto"}>
         <Text style={styles.word}>{word.word}</Text>
         <Text style={styles.hint}>터치해서 뜻 보기</Text>
       </Animated.View>
-      <Animated.View style={[styles.cardFace, backStyle]}>
-        <Text style={styles.word}>{word.meaning}</Text>
-        <Text style={styles.hint}>터치해서 단어 보기</Text>
+      <Animated.View style={[styles.cardFace, backStyle]} pointerEvents={showMeaning ? "auto" : "none"}>
+        <ScrollView style={styles.detailScroll} contentContainerStyle={styles.details} nestedScrollEnabled>
+          <Text style={styles.backWord}>{word.word}</Text>
+          <Text style={styles.meaning}>{word.meaning}</Text>
+          {getWordDetails(word).map(({ label, value }) => (
+            <View key={label} style={styles.detail}>
+              <Text style={styles.detailLabel}>{label}</Text>
+              <Text style={styles.detailValue}>{value}</Text>
+            </View>
+          ))}
+          <Text style={styles.hint}>터치해서 단어 보기</Text>
+        </ScrollView>
       </Animated.View>
     </View>
   );
@@ -349,6 +360,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     backfaceVisibility: "hidden",
   },
+  detailScroll: { flex: 1, width: "100%", borderRadius: 20 },
+  details: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 20 },
+  backWord: { fontSize: 22, fontWeight: "600", color: "#6b7280", textAlign: "center" },
+  meaning: { fontSize: 30, fontWeight: "700", color: "#111111", textAlign: "center", lineHeight: 42 },
+  detail: { gap: 6, borderTopWidth: 1, borderTopColor: "#e5e7eb", paddingTop: 16 },
+  detailLabel: { color: "#6b7280", fontSize: 14, fontWeight: "600" },
+  detailValue: { color: "#17212f", fontSize: 18, lineHeight: 28 },
   word: {
     color: "#000000",
     fontSize: 40,
