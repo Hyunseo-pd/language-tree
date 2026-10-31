@@ -10,20 +10,20 @@ type FolderProps = PressableProps & {
 export function Folder({ label, wordCount, style, onRename, onDelete, ...props }: FolderProps) {
    function renderActions() {
     return (
-      <View style={styles.actions}>
-        <Pressable
+      <View style={[styles.actions, { width: (Number(Boolean(onRename)) + Number(Boolean(onDelete))) * 80 }]}>
+        {onRename ? <Pressable
           style={[styles.actionButton, styles.rename]}
           onPress={onRename}
         >
           <Text style={styles.actionLabel}>이름 변경</Text>
-        </Pressable>
+        </Pressable> : null}
 
-        <Pressable
+        {onDelete ? <Pressable
           style={[styles.actionButton, styles.delete]}
           onPress={onDelete}
         >
           <Text style={styles.actionLabel}>삭제</Text>
-        </Pressable>
+        </Pressable> : null}
       </View>
     );
   }

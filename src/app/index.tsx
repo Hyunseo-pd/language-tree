@@ -1,10 +1,13 @@
+import { FolderNameDialog } from "@/components/FolderNameDialog";
+import { NavButton } from "@/components/NavButton";
 import { Folder } from "@/components/Folder";
 import { ScreenShell } from "@/components/ScreenShell";
-import { getLanguages, type LanguageFolder } from "@/lib/languageStore";
+import { createLanguage, renameLanguage, getLanguages, type LanguageFolder } from "@/lib/languageStore";
 import { Link, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 
 export default function LanguagesHomeScreen() {
+  const [editor, setEditor] = useState<{ language?: LanguageFolder } | null>(null);
   const [languages, setLanguages] = useState<LanguageFolder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -37,6 +40,7 @@ export default function LanguagesHomeScreen() {
   }, []));
   return (
     <ScreenShell title="언어 목록" subtitle={errorMessage ?? (isLoading ? "불러오는 중..." : "단어장을 선택하세요")}>
+      <NavButton label="＋ 폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
       {languages.map((language) => (
         <Link
           push
@@ -48,12 +52,30 @@ export default function LanguagesHomeScreen() {
           }
           asChild
         >
-          <Folder label={language.name}
-          wordCount={language.wordCount}
-          onRename={() => console.log("이름 변경")}
-  onDelete={() => console.log("삭제")} />
+          <Folder
+            label={language.name}
+            wordCount={language.wordCount}
+            onRename={() => setEditor({ language })}
+          />
         </Link>
       ))}
+      {editor ? (
+        <FolderNameDialog
+          title={editor.language ? "폴더 이름 변경" : "폴더 추가"}
+          initialName={editor.language?.name ?? ""}
+          onClose={() => setEditor(null)}
+          onSave={async (name) => {
+            if (editor.language) {
+              const id = editor.language.id;
+              await renameLanguage(id, name);
+              setLanguages((previous) => previous.map((item) => item.id === id ? { ...item, name } : item));
+            } else {
+              const language = await createLanguage(name);
+              setLanguages((previous) => [...previous, language]);
+            }
+          }}
+        />
+      ) : null}
     </ScreenShell>
   );
 }

@@ -1,4 +1,4 @@
-import { collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
@@ -35,6 +35,25 @@ export async function getLanguages(): Promise<LanguageFolder[]> {
 
     return { ...language, wordCount: countSnapshot.data().count };
   }));
+}
+
+export async function createLanguage(name: string): Promise<LanguageFolder> {
+  const trimmedName = name.trim();
+  if (!trimmedName) throw new Error("폴더 이름을 입력해 주세요.");
+  const reference = await addDoc(collection(db, "languages"), {
+    name: trimmedName,
+    createdAt: serverTimestamp(),
+  });
+  return { id: reference.id, name: trimmedName, wordCount: 0 };
+}
+
+export async function renameLanguage(languageId: string, name: string): Promise<void> {
+  const trimmedName = name.trim();
+  if (!trimmedName) throw new Error("폴더 이름을 입력해 주세요.");
+  await updateDoc(doc(db, "languages", languageId), {
+    name: trimmedName,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function getWord(languageId: string, wordId: string): Promise<WordItem | null> {
