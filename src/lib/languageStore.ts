@@ -1,7 +1,7 @@
-import { addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import { normalizeWordValues, readWordDetails, type WordDetail, type WordValues } from "@/lib/wordFields";
+import { normalizeWordValues, readWordDetails, uniqueFieldNames, type WordDetail, type WordValues } from "@/lib/wordFields";
 
 export type LanguageFolder = {
   id: string;
@@ -18,7 +18,7 @@ export type WordItem = {
   reading?: string;
   partOfSpeech?: string;
   inflections?: string;
-  legacyDetails?: WordDetail[];
+  customFields?: WordDetail[];
   createdAt?: number;
   savedAt?: number;
 };
@@ -66,22 +66,47 @@ export async function getWord(languageId: string, wordId: string): Promise<WordI
   return snapshot.exists() ? toWordItem(snapshot.id, snapshot.data()) : null;
 }
 
+// Bootstrap old field names once per folder; subsequent reads use the folder catalog.
+export async function getCustomFieldNames(languageId: string): Promise<string[]> {
+  const reference = doc(db, "languages", languageId);
+  const folder = await getDoc(reference);
+  if (!folder.exists()) throw new Error("폴더를 찾을 수 없습니다.");
+  const names = uniqueFieldNames(folder.data().customFieldNames);
+  if (folder.data().customFieldNamesInitialized === true) return names;
+
+  const words = await getDocs(collection(db, languageId));
+  const discovered = uniqueFieldNames([
+    ...names,
+    ...words.docs.flatMap((word) => readWordDetails(word.data()).customFields.map(({ label }) => label)),
+  ]);
+  await updateDoc(reference, {
+    customFieldNamesInitialized: true,
+    ...(discovered.length ? { customFieldNames: arrayUnion(...discovered) } : {}),
+  });
+  return discovered;
+}
+
 export async function createWord(languageId: string, values: WordValues): Promise<string> {
   if (!languageId) throw new Error("언어 목록에서 다시 선택해 주세요.");
-  const reference = await addDoc(collection(db, languageId), {
-    ...normalizeWordValues(values),
-    createdAt: serverTimestamp(),
-    savedAt: serverTimestamp(),
-  });
+  const normalized = normalizeWordValues(values);
+  const reference = doc(collection(db, languageId));
+  const batch = writeBatch(db);
+  batch.set(reference, { ...normalized, createdAt: serverTimestamp(), savedAt: serverTimestamp() });
+  const names = uniqueFieldNames(normalized.customFields?.map(({ label }) => label));
+  if (names.length) batch.update(doc(db, "languages", languageId), { customFieldNames: arrayUnion(...names) });
+  await batch.commit();
   return reference.id;
 }
 
 export async function updateWord(languageId: string, wordId: string, values: WordValues): Promise<void> {
-  await updateDoc(doc(db, languageId, wordId), {
-    ...normalizeWordValues(values),
-    updatedAt: serverTimestamp(),
-  });
+  const normalized = normalizeWordValues(values);
+  const batch = writeBatch(db);
+  batch.update(doc(db, languageId, wordId), { ...normalized, updatedAt: serverTimestamp() });
+  const names = uniqueFieldNames(normalized.customFields?.map(({ label }) => label));
+  if (names.length) batch.update(doc(db, "languages", languageId), { customFieldNames: arrayUnion(...names) });
+  await batch.commit();
 }
+
 export function subscribeToWords(
   languageId: string,
   onSuccess: SnapshotSuccess<WordItem>,

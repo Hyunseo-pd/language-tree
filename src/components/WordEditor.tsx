@@ -6,18 +6,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { CustomFieldsEditor } from "@/components/CustomFieldsEditor";
 import { createWord, getWord, updateWord } from "@/lib/languageStore";
 
 import { normalizeWordValues, optionalWordFields, type OptionalWordField, type WordDetail, type WordValues } from "@/lib/wordFields";
 
-type WordFields = Required<WordValues>;
+type WordFields = Required<Omit<WordValues, "customFields">>;
 const emptyFields: WordFields = { word: "", meaning: "", reading: "", partOfSpeech: "", inflections: "", example: "" };
 
 export function WordEditor({ wordId, languageId }: { wordId?: string; languageId?: string }) {
   const [fields, setFields] = useState<WordFields>(emptyFields);
   const [original, setOriginal] = useState<WordFields | null>(wordId ? null : emptyFields);
   const [selected, setSelected] = useState<OptionalWordField[]>([]);
-  const [legacyDetails, setLegacyDetails] = useState<WordDetail[]>([]);
+  const [customFields, setCustomFields] = useState<WordDetail[]>([]);
+  const [originalCustomFields, setOriginalCustomFields] = useState<WordDetail[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(wordId));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,8 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
         }
         const next: WordFields = { word: word.word, meaning: word.meaning, reading: word.reading ?? "", partOfSpeech: word.partOfSpeech ?? "", inflections: word.inflections ?? "", example: word.example ?? "" };
         setSelected(optionalWordFields.filter(({ key }) => Boolean(next[key])).map(({ key }) => key));
-        setLegacyDetails(word.legacyDetails ?? []);
+        setCustomFields(word.customFields ?? []);
+        setOriginalCustomFields(word.customFields ?? []);
         setFields(next);
         setOriginal(next);
       })
@@ -56,8 +59,9 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
 
   const effectiveFields = { ...fields };
   optionalWordFields.forEach(({ key }) => { if (!selected.includes(key)) effectiveFields[key] = ""; });
-  const dirty = original !== null && (Object.keys(effectiveFields) as (keyof WordFields)[])
-    .some((key) => effectiveFields[key] !== original[key]);
+  const dirty = original !== null && ((Object.keys(effectiveFields) as (keyof WordFields)[])
+    .some((key) => effectiveFields[key] !== original[key])
+    || JSON.stringify(customFields) !== JSON.stringify(originalCustomFields));
   const valid = Boolean(fields.word.trim() && fields.meaning.trim());
 
   function changeField(key: keyof WordFields, value: string) {
@@ -72,16 +76,19 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
     setIsSaving(true);
     setError(null);
     Keyboard.dismiss();
-    const next = normalizeWordValues(effectiveFields);
     try {
+      const next = normalizeWordValues({ ...effectiveFields, customFields });
       if (wordId) {
         await updateWord(languageId, wordId, next);
       } else {
         await createWord(languageId, next);
         router.dismissTo(`/languages/${encodeURIComponent(languageId)}` as Href);
       }
-      setFields(next);
-      setOriginal(next);
+      const { customFields: savedCustomFields = [], ...savedFields } = next;
+      setFields(savedFields);
+      setOriginal(savedFields);
+      setCustomFields(savedCustomFields);
+      setOriginalCustomFields(savedCustomFields);
       setSaved(true);
     } catch (cause: unknown) {
       setError(cause instanceof Error ? cause.message : "저장하지 못했습니다. 다시 시도해 주세요.");
@@ -160,17 +167,8 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
                     style={[styles.input, styles.multiline]} />
                 </View>
               ))}
-              {legacyDetails.length ? (
-                <View style={styles.field}>
-                  <Text style={styles.label}>기존에 기록한 정보</Text>
-                  {legacyDetails.map(({ label, value }) => (
-                    <View key={label} style={styles.field}>
-                      <Text style={styles.hint}>{label}</Text>
-                      <Text style={styles.legacyValue}>{value}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
+              <CustomFieldsEditor languageId={languageId} fields={customFields} disabled={isSaving}
+                onChange={(next) => { setCustomFields(next); setSaved(false); setError(null); }} />
               <Text accessibilityLiveRegion="polite" style={saved ? styles.success : styles.hint}>
                 {!languageId ? "언어 목록에서 다시 선택해 주세요." : saved ? "저장했습니다." : !valid ? "단어와 뜻을 모두 입력해 주세요." : dirty ? "저장하지 않은 변경사항이 있습니다." : "변경 후 저장 버튼을 눌러 주세요."}
               </Text>
@@ -204,7 +202,6 @@ const styles = StyleSheet.create({
   optionSelected: { backgroundColor: "#17212f", borderColor: "#17212f" },
   optionLabel: { color: "#283445", fontSize: 15 },
   optionLabelSelected: { color: "#ffffff" },
-  legacyValue: { color: "#17212f", fontSize: 17, lineHeight: 26 },
   label: { fontSize: 15, fontWeight: "600", color: "#283445" },
   input: { borderWidth: 1, borderColor: "#dce1e7", backgroundColor: "#f8fafc", borderRadius: 14, padding: 16, minHeight: 56, fontSize: 17, color: "#17212f" },
   multiline: { minHeight: 112, textAlignVertical: "top" },

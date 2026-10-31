@@ -6,7 +6,7 @@ export const optionalWordFields = [
 ] as const;
 
 export type OptionalWordField = typeof optionalWordFields[number]["key"];
-export type WordValues = { word: string; meaning: string } & Partial<Record<OptionalWordField, string>>;
+export type WordValues = { word: string; meaning: string } & Partial<Record<OptionalWordField, string>> & { customFields?: WordDetail[] };
 export type WordDetail = { label: string; value: string };
 
 const legacyLabels: Record<string, string> = {
@@ -57,26 +57,64 @@ export function readWordDetails(data: Record<string, unknown>) {
     partOfSpeech: canonical(data, "partOfSpeech", text(data.part) ?? text(fields.partOfSpeech)),
     inflections: canonical(data, "inflections", text(fields.inflections) ?? inflections),
     example: canonical(data, "example", text(fields.example)),
-    legacyDetails,
+    customFields: Array.isArray(data.customFields) ? readCustomFields(data.customFields) : legacyDetails,
   };
 }
 
-export function getWordDetails(word: Partial<Record<OptionalWordField, string>> & { legacyDetails?: WordDetail[] }): WordDetail[] {
+export function getWordDetails(word: Partial<Record<OptionalWordField, string>> & { customFields?: WordDetail[] }): WordDetail[] {
   return [
     ...optionalWordFields.flatMap(({ key, label }) => word[key]?.trim() ? [{ label, value: word[key]!.trim() }] : []),
-    ...(word.legacyDetails ?? []),
+    ...(word.customFields ?? []).filter(({ value }) => value.trim()),
   ];
 }
 
-export function normalizeWordValues(values: WordValues): Required<WordValues> {
+export function normalizeWordValues(values: WordValues): Required<Omit<WordValues, "customFields">> & Pick<WordValues, "customFields"> {
   const word = values.word.trim();
   const meaning = values.meaning.trim();
   if (!word || !meaning) throw new Error("단어와 뜻을 모두 입력해 주세요.");
   return {
     word, meaning,
+    ...(values.customFields !== undefined ? { customFields: normalizeCustomFields(values.customFields) } : {}),
     reading: values.reading?.trim() ?? "",
     partOfSpeech: values.partOfSpeech?.trim() ?? "",
     inflections: values.inflections?.trim() ?? "",
     example: values.example?.trim() ?? "",
   };
+}
+
+export function fieldNameKey(label: string): string {
+  return label.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+export function uniqueFieldNames(values: unknown): string[] {
+  if (!Array.isArray(values)) return [];
+  const seen = new Set<string>();
+  return values.flatMap((value) => {
+    const label = text(value)?.replace(/\s+/g, " ");
+    if (!label || seen.has(fieldNameKey(label))) return [];
+    seen.add(fieldNameKey(label));
+    return [label];
+  });
+}
+
+function readCustomFields(values: unknown[]): WordDetail[] {
+  return values.flatMap((item) => {
+    const data = record(item);
+    const label = text(data.label);
+    return label ? [{ label, value: displayValue(data.value) ?? "" }] : [];
+  });
+}
+
+export function normalizeCustomFields(fields: WordDetail[]): WordDetail[] {
+  const seen = new Set<string>();
+  const reserved = new Set(["단어", "뜻", ...optionalWordFields.map(({ label }) => fieldNameKey(label))]);
+  return fields.map(({ label, value }) => {
+    const name = label.trim().replace(/\s+/g, " ");
+    const key = fieldNameKey(name);
+    if (!name) throw new Error("자유 항목의 이름을 입력해 주세요.");
+    if (reserved.has(key)) throw new Error("공통 항목은 위의 선택 버튼을 사용해 주세요.");
+    if (seen.has(key)) throw new Error("같은 이름의 항목은 한 번만 추가해 주세요.");
+    seen.add(key);
+    return { label: name, value: value.trim() };
+  });
 }
