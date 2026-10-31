@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 
 import { NavButton } from "@/components/NavButton";
 import { ScreenShell } from "@/components/ScreenShell";
+import { WordListItem } from "@/components/WordListItem";
 import { getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
 
 export default function LanguageWordsScreen() {
@@ -148,19 +149,18 @@ export default function LanguageWordsScreen() {
       ) : null}
 
       {sortedWords.map((word) => (
-        <Link
-          push
+        <WordListItem
           key={word.id}
-          href={
-            {
-              pathname: "/[wordId]/edit",
-              params: { wordId: word.id, languageId },
-            } as Href
-          }
-          asChild
-        >
-          <NavButton label={word.meaning ? `${word.word}` : word.word} />
-        </Link>
+          label={word.word}
+          onPress={() => router.push({
+            pathname: "/[wordId]",
+            params: { wordId: word.id, languageId },
+          } as Href)}
+          onEdit={() => router.push({
+            pathname: "/[wordId]/edit",
+            params: { wordId: word.id, languageId },
+          } as Href)}
+        />
       ))}
     </ScreenShell>
   );
