@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   trigger: { width: 44, height: 44, justifyContent: "center", alignItems: "center" },
   icon: { width: 36, height: 36 },
   overlay: { flex: 1 },
-  menu: { position: "absolute", padding:8, backgroundColor: Palette.white, borderWidth: 1, borderColor: Palette.secondary, borderRadius: 9999 },
+  menu: { position: "absolute", padding:8, backgroundColor: Palette.white, borderWidth: 1, borderColor: Palette.gray50, borderRadius: 9999 },
   confirm: { minHeight: 36, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
   pressed: { backgroundColor: Palette.surfacePressed },
   label: { fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600", color: Palette.destructive },
