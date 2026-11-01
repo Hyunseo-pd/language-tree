@@ -14,17 +14,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
-import { sortWords, useWordSort } from "@/lib/wordSort";
+import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
 
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
     wordId?: string;
-   languageId?: string;
+    languageId?: string;
   }>();
   const [firebaseWords, setFirebaseWords] = useState<WordItem[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(languageId));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [indexOffset, setIndexOffset] = useState(0);
+  const routeKey = JSON.stringify([languageId, wordId]);
+  const [selection, setSelection] = useState({ routeKey, id: wordId });
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [transition, setTransition] = useState<{ direction: number; sequence: number } | null>(null);
   const slideX = useSharedValue(0);
@@ -44,7 +46,8 @@ export default function WordCardScreen() {
 
   function completeSwipe(direction: number) {
     setShowMeaning(false);
-    setIndexOffset((previous) => previous + (direction < 0 ? 1 : -1));
+    const target = direction < 0 ? nextWord : previousWord;
+    if (target) setSelection({ routeKey, id: target.id });
     setTransition((previous) => ({ direction, sequence: (previous?.sequence ?? 0) + 1 }));
   }
 
@@ -74,9 +77,9 @@ export default function WordCardScreen() {
 
   const selectedIndex = Math.max(
     0,
-    words.findIndex((word) => word.id === wordId),
+    words.findIndex((word) => word.id === (selection.routeKey === routeKey ? selection.id : wordId)),
   );
-  const index = words.length === 0 ? 0 : ((selectedIndex + indexOffset) % words.length + words.length) % words.length;
+  const index = selectedIndex;
   const currentWord = words[index];
   const previousWord = words.length ? words[(index - 1 + words.length) % words.length] : undefined;
   const nextWord = words.length ? words[(index + 1) % words.length] : undefined;
@@ -93,7 +96,7 @@ export default function WordCardScreen() {
     }
 
     setShowMeaning(false);
-    setIndexOffset((prev) => prev - 1);
+    if (previousWord) setSelection({ routeKey, id: previousWord.id });
   }
 
   function showNext() {
@@ -102,12 +105,20 @@ export default function WordCardScreen() {
     }
 
     setShowMeaning(false);
-    setIndexOffset((prev) => prev + 1);
+    if (nextWord) setSelection({ routeKey, id: nextWord.id });
+  }
+
+  function changeSort(order: WordSortOrder) {
+    if (!languageId || transitioning.get()) return;
+    // Anchor the visible word before publishing the new shared order.
+    if (currentWord) setSelection({ routeKey, id: currentWord.id });
+    selectWordSort(languageId, order, firebaseWords);
+    setSortMenuOpen(false);
   }
 
   const canInteract = Boolean(currentWord) && !isLoading && !errorMessage;
   const swipeGesture = Gesture.Pan()
-    .enabled(canInteract)
+    .enabled(canInteract && !sortMenuOpen)
     .activeOffsetX([-16, 16])
     .failOffsetY([-24, 24])
     .maxPointers(1)
@@ -139,7 +150,7 @@ export default function WordCardScreen() {
       if (!success && !transitioning.value) slideX.set(withTiming(0, { duration: 180 }));
     });
   const tapGesture = Gesture.Tap()
-    .enabled(canInteract)
+    .enabled(canInteract && !sortMenuOpen)
     .maxDistance(12)
     .runOnJS(true)
     .onEnd((_event, success) => {
@@ -179,20 +190,43 @@ export default function WordCardScreen() {
             {words.length === 0 ? 0 : index + 1}/{words.length}
           </Text>
 
-          <View style={styles.headerActions}>
-            <Link
-              href={
-                {
-                  pathname: "/[wordId]/edit",
-                  params: { wordId: currentWord?.id ?? wordId, languageId },
-                } as Href
-              }
-              asChild
-            >
-              <Pressable accessibilityRole="button" accessibilityLabel={"\uB2E8\uC5B4 \uD3B8\uC9D1"} disabled={!currentWord} style={styles.editButton}><Text style={styles.editLabel}>{"\uD3B8\uC9D1"}</Text></Pressable>
-            </Link>
-          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={"\uC815\uB82C"}
+            accessibilityState={{ expanded: sortMenuOpen }}
+            disabled={!canInteract}
+            style={styles.editButton}
+            onPress={() => {
+              if (!transitioning.get()) setSortMenuOpen((open) => !open);
+            }}
+          >
+            <Text style={styles.editLabel}>{sortMenuOpen ? "\uC815\uB82C \u25B4" : "\uC815\uB82C \u25BE"}</Text>
+          </Pressable>
         </View>
+
+        {sortMenuOpen ? (
+          <>
+            <Pressable style={styles.menuBackdrop} accessibilityRole="button"
+              accessibilityLabel={"\uC815\uB82C \uBA54\uB274 \uB2EB\uAE30"}
+              onPress={() => setSortMenuOpen(false)} />
+            <View style={styles.sortMenu}>
+              {([
+                { value: "alphabetical", label: "\uC54C\uD30C\uBCB3\uC21C" },
+                { value: "date", label: "\uB0A0\uC9DC\uC21C (\uCD5C\uC2E0\uC21C)" },
+                { value: "random", label: "\uB79C\uB364" },
+              ] as const).map((option) => (
+                <Pressable key={option.value} accessibilityRole="button"
+                  accessibilityState={{ selected: sort.order === option.value }}
+                  onPress={() => changeSort(option.value)}
+                  style={[styles.sortOption, sort.order === option.value && styles.sortOptionSelected]}>
+                  <Text style={[styles.editLabel, sort.order === option.value && styles.sortOptionLabelSelected]}>
+                    {option.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        ) : null}
 
         <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
         <View style={styles.cardViewport} onLayout={(event) => { cardWidth.set(event.nativeEvent.layout.width); }}>
@@ -248,7 +282,19 @@ export default function WordCardScreen() {
         </View>
         </GestureDetector>
 
-        <View style={styles.footer} />
+        <View style={styles.footer}>
+            <Link
+              href={
+                {
+                  pathname: "/[wordId]/edit",
+                  params: { wordId: currentWord?.id ?? wordId, languageId },
+                } as Href
+              }
+              asChild
+            >
+              <Pressable accessibilityRole="button" accessibilityLabel={"\uB2E8\uC5B4 \uD3B8\uC9D1"} disabled={!currentWord} style={styles.editButton}><Text style={styles.editLabel}>{"\uD3B8\uC9D1"}</Text></Pressable>
+            </Link>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -323,10 +369,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-  headerActions: {
-    flexDirection: "row",
-    gap: 18,
+  menuBackdrop: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, zIndex: 10 },
+  sortMenu: {
+    position: "absolute", top: 76, right: 22, zIndex: 11,
+    width: 200, padding: 8, gap: 4,
+    backgroundColor: "#f1f3f5", borderRadius: 14,
+    borderWidth: 1, borderColor: "#d1d5db",
   },
+  sortOption: { minHeight: 48, justifyContent: "center", paddingHorizontal: 16, borderRadius: 10 },
+  sortOptionSelected: { backgroundColor: "#111111" },
+  sortOptionLabelSelected: { color: "#ffffff" },
   counter: {
     color: "#000000",
     fontSize: 32,
@@ -387,7 +439,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     height: 78,
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     paddingHorizontal: 12,
   },
   listIcon: {
