@@ -1,3 +1,4 @@
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { Fonts, FontSizes, Palette as palette, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
@@ -16,7 +17,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { subscribeToWords, type WordItem } from "@/lib/languageStore";
+import { deleteWord, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
 import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
 
@@ -30,6 +31,7 @@ export default function WordCardScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const routeKey = JSON.stringify([languageId, wordId]);
   const [selection, setSelection] = useState({ routeKey, id: wordId });
+  const [isDeleting, setIsDeleting] = useState(false);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [transition, setTransition] = useState<{ direction: number; sequence: number } | null>(null);
@@ -119,7 +121,26 @@ export default function WordCardScreen() {
     selectWordSort(languageId, order, firebaseWords);
   }
 
-  const canInteract = Boolean(currentWord) && !isLoading && !errorMessage;
+  async function removeCurrentWord() {
+    if (!languageId || !currentWord || isDeleting || transitioning.get()) {
+      throw new Error("지금은 삭제할 수 없습니다.");
+    }
+    const deletingId = currentWord.id;
+    const target = words.length > 1 ? nextWord : undefined;
+    setIsDeleting(true);
+    setShowMeaning(false);
+    try {
+      await deleteWord(languageId, deletingId);
+      if (target) setSelection({ routeKey, id: target.id });
+    } catch (error) {
+      setSelection({ routeKey, id: deletingId });
+      throw error;
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  const canInteract = Boolean(currentWord) && !isLoading && !errorMessage && !isDeleting;
   const swipeGesture = Gesture.Pan()
     .enabled(canInteract && !sortMenuOpen)
     .activeOffsetX([-16, 16])
@@ -253,6 +274,8 @@ export default function WordCardScreen() {
           <Pressable accessibilityRole="button" accessibilityLabel="이전 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showPrevious(); }}>
             <Image source={WordnoteIcons.previous} style={styles.icon} contentFit="contain" />
           </Pressable>
+          <DeleteButton onDelete={removeCurrentWord} disabled={!canInteract || !languageId}
+            accessibilityLabel="단어 삭제 메뉴" />
             <Link
               href={
                 {

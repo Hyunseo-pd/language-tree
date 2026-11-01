@@ -1,4 +1,4 @@
-import { arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, query, where, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { deleteDoc, arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, query, where, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { normalizeWordValues, readWordDetails, uniqueFieldNames, type WordDetail, type WordValues } from "@/lib/wordFields";
@@ -112,6 +112,11 @@ export async function updateWord(languageId: string, wordId: string, values: Wor
   const names = uniqueFieldNames(normalized.customFields?.map(({ label }) => label));
   if (names.length) batch.update(doc(db, "languages", languageId), { customFieldNames: arrayUnion(...names) });
   await batch.commit();
+}
+
+export async function deleteWord(languageId: string, wordId: string): Promise<void> {
+  if (!languageId || !wordId) throw new Error("삭제할 단어를 찾을 수 없습니다.");
+  await deleteDoc(doc(db, languageId, wordId));
 }
 
 export function subscribeToWords(
