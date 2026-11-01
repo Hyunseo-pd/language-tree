@@ -1,5 +1,4 @@
 import { DeleteButton } from "@/components/ui/DeleteButton";
-import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { Fonts, FontSizes, Palette as palette, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
@@ -19,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { deleteWord, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
-import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
+import { sortWords, useWordSort } from "@/lib/wordSort";
 
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
@@ -32,7 +31,6 @@ export default function WordCardScreen() {
   const routeKey = JSON.stringify([languageId, wordId]);
   const [selection, setSelection] = useState({ routeKey, id: wordId });
   const [isDeleting, setIsDeleting] = useState(false);
-  const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [transition, setTransition] = useState<{ direction: number; sequence: number } | null>(null);
   const slideX = useSharedValue(0);
@@ -114,13 +112,6 @@ export default function WordCardScreen() {
     if (nextWord) setSelection({ routeKey, id: nextWord.id });
   }
 
-  function changeSort(order: WordSortOrder) {
-    if (!languageId || transitioning.get()) return;
-    // Anchor the visible word before publishing the new shared order.
-    if (currentWord) setSelection({ routeKey, id: currentWord.id });
-    selectWordSort(languageId, order, firebaseWords);
-  }
-
   async function removeCurrentWord() {
     if (!languageId || !currentWord || isDeleting || transitioning.get()) {
       throw new Error("지금은 삭제할 수 없습니다.");
@@ -142,7 +133,7 @@ export default function WordCardScreen() {
 
   const canInteract = Boolean(currentWord) && !isLoading && !errorMessage && !isDeleting;
   const swipeGesture = Gesture.Pan()
-    .enabled(canInteract && !sortMenuOpen)
+    .enabled(canInteract)
     .activeOffsetX([-16, 16])
     .failOffsetY([-24, 24])
     .maxPointers(1)
@@ -174,7 +165,7 @@ export default function WordCardScreen() {
       if (!success && !transitioning.value) slideX.set(withTiming(0, { duration: 180 }));
     });
   const tapGesture = Gesture.Tap()
-    .enabled(canInteract && !sortMenuOpen)
+    .enabled(canInteract)
     .maxDistance(12)
     .runOnJS(true)
     .onEnd((_event, success) => {
@@ -185,35 +176,23 @@ export default function WordCardScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
         <View style={styles.header}>
-          <Link
-            dismissTo
-            href={
-              languageId
-                ? (`/languages/${encodeURIComponent(languageId)}` as Href)
-                : "/"
-            }
-            asChild
-          >
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={"\uB2E8\uC5B4 \uBAA9\uB85D\uC73C\uB85C"}
-              style={styles.iconButton}
-            >
+          <Link dismissTo href={languageId ? (`/languages/${encodeURIComponent(languageId)}` as Href) : "/"} asChild>
+            <Pressable accessibilityRole="button" accessibilityLabel="단어 목록으로" style={styles.iconButton}>
               <Image source={WordnoteIcons.back} style={styles.icon} contentFit="contain" />
             </Pressable>
           </Link>
-
-          <Text style={styles.counter}>
+          <Text pointerEvents="none" style={styles.counter}>
             {words.length === 0 ? 0 : index + 1}/{words.length}
           </Text>
-
-          <WordSortDropdown
-            value={sort.order}
-            onChange={changeSort}
-            open={sortMenuOpen}
-            onOpenChange={(open) => { if (!open || !transitioning.get()) setSortMenuOpen(open); }}
-            disabled={!canInteract}
-          />
+          <View style={styles.headerActions}>
+            <DeleteButton placement="below" onDelete={removeCurrentWord} disabled={!canInteract || !languageId}
+              accessibilityLabel="단어 삭제 메뉴" />
+            <Link href={{ pathname: "/[wordId]/edit", params: { wordId: currentWord?.id ?? wordId, languageId } } as Href} asChild>
+              <Pressable accessibilityRole="button" accessibilityLabel="단어 편집" disabled={!canInteract} style={styles.iconButton}>
+                <Image source={WordnoteIcons.edit} style={styles.icon} contentFit="contain" />
+              </Pressable>
+            </Link>
+          </View>
         </View>
 
         <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
@@ -274,19 +253,7 @@ export default function WordCardScreen() {
           <Pressable accessibilityRole="button" accessibilityLabel="이전 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showPrevious(); }}>
             <Image source={WordnoteIcons.previous} style={styles.icon} contentFit="contain" />
           </Pressable>
-          <DeleteButton onDelete={removeCurrentWord} disabled={!canInteract || !languageId}
-            accessibilityLabel="단어 삭제 메뉴" />
-            <Link
-              href={
-                {
-                  pathname: "/[wordId]/edit",
-                  params: { wordId: currentWord?.id ?? wordId, languageId },
-                } as Href
-              }
-              asChild
-            >
-              <Pressable accessibilityRole="button" accessibilityLabel="단어 편집" disabled={!canInteract} style={styles.iconButton}><Image source={WordnoteIcons.edit} style={styles.icon} contentFit="contain" /></Pressable>
-            </Link>
+
           <Pressable accessibilityRole="button" accessibilityLabel="다음 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showNext(); }}>
             <Image source={WordnoteIcons.next} style={styles.icon} contentFit="contain" />
           </Pressable>
@@ -328,7 +295,7 @@ function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean 
               <Text style={styles.detailValue}>{value}</Text>
             </View>
           ))}
-          <Text style={styles.hint}>터치해서 단어 보기</Text>
+          <Text style={styles.hint}>터치해서 뒤집기</Text>
         </ScrollView>
       </Animated.View>
     </View>
@@ -339,6 +306,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.background },
   screen: { flex: 1, paddingHorizontal: 21, paddingBottom: 34 },
   header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   icon: { width: 36, height: 36 },
   iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.text },
@@ -347,7 +315,7 @@ const styles = StyleSheet.create({
   previewCard: { position: "absolute", top: 0, bottom: 0, left: 12, right: 12 },
   cardFace: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", borderRadius: 5, backgroundColor: palette.background, backfaceVisibility: "hidden" },
   word: { color: palette.text, fontFamily: Fonts.word, fontSize: FontSizes.word, fontWeight: "800", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
-  hint: { marginTop: 16, fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.gray50, textAlign: "center" },
+  hint: { marginTop: 16, fontFamily: Fonts.sans, fontSize: FontSizes.body, lineHeight: 24, color: palette.gray50, textAlign: "center" },
   detailScroll: { flex: 1, width: "100%", borderRadius: 5 },
   details: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 20 },
   backWord: { fontFamily: Fonts.word, fontSize: FontSizes.wordLabel, fontWeight: "600", color: palette.gray50, textAlign: "center" },

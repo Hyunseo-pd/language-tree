@@ -6,12 +6,13 @@ import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
 
 type DeleteButtonProps = {
+  placement?: "above" | "below";
   onDelete: () => Promise<void>;
   disabled?: boolean;
   accessibilityLabel?: string;
 };
 
-export function DeleteButton({ onDelete, disabled = false, accessibilityLabel = "삭제 메뉴" }: DeleteButtonProps) {
+export function DeleteButton({ onDelete, disabled = false, accessibilityLabel = "삭제 메뉴", placement = "above" }: DeleteButtonProps) {
   const trigger = useRef<ComponentRef<typeof View>>(null);
   const inFlight = useRef(false);
   const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null);
@@ -58,7 +59,9 @@ export function DeleteButton({ onDelete, disabled = false, accessibilityLabel = 
           <View accessibilityViewIsModal style={[styles.menu, {
             width: menuWidth,
             left: Math.max(8, Math.min((anchor?.x ?? 0) - menuWidth / 2, width - menuWidth - 8)),
-            bottom: Math.max(8, height - (anchor?.y ?? 0) + 8),
+            ...(placement === "below"
+              ? { top: (anchor?.y ?? 0) + 44 + 8 }
+              : { bottom: Math.max(8, height - (anchor?.y ?? 0) + 8) }),
           }]}>
             <Pressable accessibilityRole="button" accessibilityLabel="삭제 확인" accessibilityState={{ busy, disabled: busy }}
               disabled={busy} onPress={confirmDelete} style={({ pressed }) => [styles.confirm, pressed && styles.pressed]}>
