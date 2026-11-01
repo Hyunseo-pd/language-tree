@@ -1,4 +1,4 @@
-import { Palette as palette, Fonts, FontSizes } from "@/constants/theme";
+import { Fonts, FontSizes, Palette as palette } from "@/constants/theme";
 import { Image } from "expo-image";
 import { useRef, useState, type ComponentRef } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -71,8 +71,8 @@ export function DropdownMenu<T extends string>({
 }
 
 const styles = StyleSheet.create({
-  container: { alignSelf: "flex-end" },
-  trigger: { minHeight: 44, flexDirection: "row", alignItems: "center", backgroundColor: palette.white, borderWidth: 1, borderColor: palette.secondary, borderRadius: 18, paddingHorizontal: 4, gap: 4 },
+  container: { alignSelf: "center" },
+  trigger: { minHeight: 36, flexDirection: "row", alignItems: "center", backgroundColor: palette.white, borderWidth: 1, borderColor: palette.secondary, borderRadius: 9999, paddingHorizontal: 4, gap: 4 },
   label: { minWidth: 36, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.body, color: palette.text },
   icon: { width: 36, height: 36 },
   dimmed: { opacity: 0.6 },

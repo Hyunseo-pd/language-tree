@@ -4,8 +4,12 @@ import { Platform } from 'react-native';
 
 // Shared fixed colors. Use Colors[scheme] / useTheme() for adaptive surfaces.
 export const Palette = {
-  white: '#FFFFFF', background: '#FDFBF3', text: '#000000', icon: '#4C4C4C',
-  secondary: '#8A8A8A', accent: '#009552', textStrong: '#111111',
+  white: '#FFFFFF', 
+  background: '#FDFBF3', 
+  text: '#000000', 
+  icon: '#4C4C4C',
+  secondary: '#8A8A8A', 
+  accent: '#009552', textStrong: '#111111',
   textMuted: '#666666', textInput: '#17212F', textLabel: '#283445',
   textHint: '#6B7280', placeholder: '#9299A3', border: '#CCCCCC',
   borderSubtle: '#E5E5E5', borderInput: '#DCE1E7', surfaceInput: '#F8FAFC',

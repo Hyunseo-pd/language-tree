@@ -1,5 +1,5 @@
-import { Palette as palette, Palette, Fonts, FontSizes } from "@/constants/theme";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
+import { Fonts, FontSizes, Palette as palette, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
 import { Link, useLocalSearchParams, type Href } from "expo-router";
