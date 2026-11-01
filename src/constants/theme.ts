@@ -19,7 +19,7 @@ export const Palette = {
 } as const;
 
 export const FontAssets = {
-  Inter: require('../../assets/fonts/Inter/Inter.ttf'),
+  Castoro: require('../../assets/fonts/Castoro/Castoro.ttf'),
 } as const;
 
 export const FontSizes = {
@@ -59,22 +59,21 @@ const SystemFonts = Platform.select({
     mono: 'ui-monospace',
   },
   default: {
-    sans: 'normal',
+    sans: 'sans-serif',
     serif: 'serif',
     rounded: 'normal',
     mono: 'monospace',
   },
   web: {
-    sans: 'var(--font-display)',
+    sans: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     serif: 'var(--font-serif)',
     rounded: 'var(--font-rounded)',
     mono: 'var(--font-mono)',
   },
 });
 
-// All app text uses the font loaded by the root layout; keep platform fallbacks
-// available for specialized serif, rounded and monospace content.
-export const Fonts = { ...SystemFonts, sans: 'Inter' } as const;
+// System UI font for general text; bundled Castoro for vocabulary words.
+export const Fonts = { ...SystemFonts, word: 'Castoro' } as const;
 
 export const Spacing = {
   half: 2,
