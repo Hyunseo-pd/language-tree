@@ -11,9 +11,10 @@ type ScreenShellProps = PropsWithChildren<{
   headerContent?: ReactNode;
   toolbar?: ReactNode;
   compact?: boolean;
+  scrollable?: boolean;
 }>;
 
-export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerContent, toolbar, compact = false, children }: ScreenShellProps) {
+export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerContent, toolbar, compact = false, scrollable = true, children }: ScreenShellProps) {
   return (
     <SafeAreaView style={[styles.safeArea, compact && styles.compactSafeArea]}>
       <View style={[styles.container, compact && styles.compactContainer]}>
@@ -30,7 +31,7 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerCo
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
         {toolbar ? <View style={[styles.toolbar, compact && styles.compactToolbar]}>{toolbar}</View> : null}
-        <ScrollView
+        {scrollable ? <ScrollView
           style={styles.scroller}
           contentContainerStyle={[styles.content, compact && styles.compactContent]}
           showsVerticalScrollIndicator={false}
@@ -38,7 +39,7 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerCo
           keyboardDismissMode="on-drag"
         >
           {children}
-        </ScrollView>
+        </ScrollView> : <View style={styles.scroller}>{children}</View>}
       </View>
     </SafeAreaView>
   );

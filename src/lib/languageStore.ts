@@ -26,12 +26,37 @@ export type WordItem = {
 type SnapshotSuccess<T> = (items: T[]) => void;
 type SnapshotError = (error: FirestoreError) => void;
 
+let cachedLanguages: LanguageFolder[] | undefined;
+let languagesFetchedAt = 0;
+let languagesRequest: Promise<LanguageFolder[]> | undefined;
+const wordCache = new Map<string, WordItem[]>();
+type WordSubscriber = { onSuccess: SnapshotSuccess<WordItem>; onError: SnapshotError };
+const wordSubscriptions = new Map<string, { listeners: Set<WordSubscriber>; unsubscribe: () => void }>();
+
+export function getCachedLanguages() { return cachedLanguages; }
+export function getCachedWords(languageId: string | undefined) {
+  return languageId ? wordCache.get(languageId) : undefined;
+}
+
 export async function getLanguageName(languageId: string): Promise<string | undefined> {
+  const cached = cachedLanguages?.find((language) => language.id === languageId);
+  if (cached) return cached.name;
   const snapshot = await getDoc(doc(db, "languages", languageId));
   return snapshot.exists() ? getString(snapshot.data().name) : undefined;
 }
 
 export async function getLanguages(): Promise<LanguageFolder[]> {
+  if (cachedLanguages && Date.now() - languagesFetchedAt < 30_000) return cachedLanguages;
+  if (languagesRequest) return languagesRequest;
+  languagesRequest = fetchLanguages().then((languages) => {
+    cachedLanguages = languages;
+    languagesFetchedAt = Date.now();
+    return languages;
+  }).finally(() => { languagesRequest = undefined; });
+  return languagesRequest;
+}
+
+async function fetchLanguages(): Promise<LanguageFolder[]> {
   const snapshot = await getDocs(collection(db, "languages"));
 
   return Promise.all(snapshot.docs.map(async (doc) => {
@@ -54,7 +79,10 @@ export async function createLanguage(name: string): Promise<LanguageFolder> {
     name: trimmedName,
     createdAt: serverTimestamp(),
   });
-  return { id: reference.id, name: trimmedName, wordCount: 0 };
+  const language = { id: reference.id, name: trimmedName, wordCount: 0 };
+  if (cachedLanguages) cachedLanguages = [...cachedLanguages, language];
+  languagesFetchedAt = 0;
+  return language;
 }
 
 export async function renameLanguage(languageId: string, name: string): Promise<void> {
@@ -64,6 +92,8 @@ export async function renameLanguage(languageId: string, name: string): Promise<
     name: trimmedName,
     updatedAt: serverTimestamp(),
   });
+  cachedLanguages = cachedLanguages?.map((language) => language.id === languageId ? { ...language, name: trimmedName } : language);
+  languagesFetchedAt = 0;
 }
 
 export async function getWord(languageId: string, wordId: string): Promise<WordItem | null> {
@@ -102,6 +132,7 @@ export async function createWord(languageId: string, values: WordValues): Promis
   const names = uniqueFieldNames(normalized.customFields?.map(({ label }) => label));
   if (names.length) batch.update(doc(db, "languages", languageId), { customFieldNames: arrayUnion(...names) });
   await batch.commit();
+  languagesFetchedAt = 0;
   return reference.id;
 }
 
@@ -117,6 +148,7 @@ export async function updateWord(languageId: string, wordId: string, values: Wor
 export async function deleteWord(languageId: string, wordId: string): Promise<void> {
   if (!languageId || !wordId) throw new Error("삭제할 단어를 찾을 수 없습니다.");
   await deleteDoc(doc(db, languageId, wordId));
+  languagesFetchedAt = 0;
 }
 
 export function subscribeToWords(
@@ -124,7 +156,15 @@ export function subscribeToWords(
   onSuccess: SnapshotSuccess<WordItem>,
   onError: SnapshotError,
 ) {
-  return onSnapshot(
+  const listener = { onSuccess, onError };
+  const cached = wordCache.get(languageId);
+  if (cached) onSuccess(cached);
+  let shared = wordSubscriptions.get(languageId);
+  if (!shared) {
+    shared = { listeners: new Set<WordSubscriber>(), unsubscribe: () => {} };
+    wordSubscriptions.set(languageId, shared);
+    const subscription = shared;
+    subscription.unsubscribe = onSnapshot(
     collection(db, languageId),
     (snapshot) => {
       const words = snapshot.docs
@@ -132,10 +172,25 @@ export function subscribeToWords(
         .map((doc) => toWordItem(doc.id, doc.data()))
         .sort((a, b) => a.word.localeCompare(b.word));
 
-      onSuccess(words);
+      wordCache.set(languageId, words);
+      cachedLanguages = cachedLanguages?.map((language) => language.id === languageId ? { ...language, wordCount: words.length } : language);
+      subscription.listeners.forEach((subscriber) => subscriber.onSuccess(words));
     },
-    onError,
+    (error) => {
+      subscription.listeners.forEach((subscriber) => subscriber.onError(error));
+      wordSubscriptions.delete(languageId);
+    },
   );
+  }
+  shared.listeners.add(listener);
+  const subscription = shared;
+  return () => {
+    subscription.listeners.delete(listener);
+    if (!subscription.listeners.size) {
+      subscription.unsubscribe();
+      if (wordSubscriptions.get(languageId) === subscription) wordSubscriptions.delete(languageId);
+    }
+  };
 }
 
 function toLanguageFolder(id: string, data: DocumentData): LanguageFolder {

@@ -2,19 +2,21 @@ import { FolderNameDialog } from "@/components/FolderNameDialog";
 import { ListButton } from "@/components/ui/ListButton";
 import { Folder } from "@/components/Folder";
 import { ScreenShell } from "@/components/ScreenShell";
-import { createLanguage, renameLanguage, getLanguages, type LanguageFolder } from "@/lib/languageStore";
+import { createLanguage, renameLanguage, getLanguages, getCachedLanguages, type LanguageFolder } from "@/lib/languageStore";
 import { Link, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 
 export default function LanguagesHomeScreen() {
   const [editor, setEditor] = useState<{ language?: LanguageFolder } | null>(null);
-  const [languages, setLanguages] = useState<LanguageFolder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [languages, setLanguages] = useState<LanguageFolder[]>(() => getCachedLanguages() ?? []);
+  const [isLoading, setIsLoading] = useState(() => !getCachedLanguages());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
  
   useFocusEffect(useCallback(() => {
     let isActive = true;
-    setIsLoading(true);
+    const cached = getCachedLanguages();
+    if (cached) setLanguages(cached);
+    setIsLoading(!cached);
     setErrorMessage(null);
 
     getLanguages()

@@ -16,7 +16,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { deleteWord, subscribeToWords, type WordItem } from "@/lib/languageStore";
+import { deleteWord, getCachedWords, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
 import { sortWords, useWordSort } from "@/lib/wordSort";
 
@@ -25,8 +25,8 @@ export default function WordCardScreen() {
     wordId?: string;
     languageId?: string;
   }>();
-  const [firebaseWords, setFirebaseWords] = useState<WordItem[]>([]);
-  const [isLoading, setIsLoading] = useState(Boolean(languageId));
+  const [firebaseWords, setFirebaseWords] = useState<WordItem[]>(() => getCachedWords(languageId) ?? []);
+  const [isLoading, setIsLoading] = useState(() => Boolean(languageId) && !getCachedWords(languageId));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const routeKey = JSON.stringify([languageId, wordId]);
   const [selection, setSelection] = useState({ routeKey, id: wordId });

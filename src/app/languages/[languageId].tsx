@@ -5,11 +5,11 @@ import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
 import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
-import { ActivityIndicator, Animated, Keyboard, Pressable, StyleSheet, Text, TextInput, useAnimatedValue, View } from "react-native";
+import { ActivityIndicator, Animated, FlatList, Keyboard, Pressable, StyleSheet, Text, TextInput, useAnimatedValue, View } from "react-native";
 
 import { ScreenShell } from "@/components/ScreenShell";
 import { WordListItem } from "@/components/WordListItem";
-import { getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
+import { getCachedWords, getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
 
 export default function LanguageWordsScreen() {
@@ -22,8 +22,8 @@ export default function LanguageWordsScreen() {
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [words, setWords] = useState<WordItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [words, setWords] = useState<WordItem[]>(() => getCachedWords(languageId) ?? []);
+  const [isLoading, setIsLoading] = useState(() => !getCachedWords(languageId));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -79,6 +79,7 @@ export default function LanguageWordsScreen() {
   return (
     <ScreenShell
       compact
+      scrollable={false}
       title={isLoading ? title : `${title}(${words.length})`}
       headerContent={searchOpen ? (
         <SearchHeader value={search} onChange={setSearch} onCancel={() => {
@@ -127,7 +128,16 @@ export default function LanguageWordsScreen() {
         <Text style={styles.stateText}>검색 결과가 없습니다.</Text>
       ) : null}
 
-      {visibleWords.map((word) => (
+      <FlatList
+        data={visibleWords}
+        keyExtractor={(word) => word.id}
+        initialNumToRender={16}
+        maxToRenderPerBatch={12}
+        windowSize={5}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item: word }) => (
         <WordListItem
           key={word.id}
           label={word.word}
@@ -140,7 +150,8 @@ export default function LanguageWordsScreen() {
             params: { wordId: word.id, languageId },
           } as Href)}
         />
-      ))}
+        )}
+      />
     </ScreenShell>
   );
 }
