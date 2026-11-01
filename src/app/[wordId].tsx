@@ -2,8 +2,8 @@ import { DeleteButton } from "@/components/ui/DeleteButton";
 import { Fonts, FontSizes, Palette as palette, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
-import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { Link, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -19,6 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { deleteWord, getCachedWords, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
 import { sortWords, useWordSort } from "@/lib/wordSort";
+import { rememberCardWord } from "@/lib/wordListReturn";
 
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
@@ -85,6 +86,9 @@ export default function WordCardScreen() {
   );
   const index = selectedIndex;
   const currentWord = words[index];
+  useFocusEffect(useCallback(() => {
+    if (languageId && currentWord && !isLoading && !errorMessage) rememberCardWord(languageId, currentWord.id);
+  }, [languageId, currentWord, isLoading, errorMessage]));
   const previousWord = words.length ? words[(index - 1 + words.length) % words.length] : undefined;
   const nextWord = words.length ? words[(index + 1) % words.length] : undefined;
   const previousStyle = useAnimatedStyle(() => ({

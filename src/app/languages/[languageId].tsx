@@ -11,6 +11,8 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { WordListItem } from "@/components/WordListItem";
 import { getCachedWords, getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
+import { useWordListReturn } from "@/hooks/useWordListReturn";
+import { getCardReturn } from "@/lib/wordListReturn";
 
 export default function LanguageWordsScreen() {
   const { languageId, languageName } = useLocalSearchParams<{
@@ -26,6 +28,8 @@ export default function LanguageWordsScreen() {
   const [words, setWords] = useState<WordItem[]>(() => getCachedWords(languageId) ?? []);
   const [isLoading, setIsLoading] = useState(() => !getCachedWords(languageId));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const list = useRef<FlatList<WordItem>>(null);
+  const [listHeight, setListHeight] = useState(0);
 
   useEffect(() => {
     const unsubscribe = subscribeToWords(
@@ -53,6 +57,13 @@ export default function LanguageWordsScreen() {
   const visibleWords = useMemo(() => sortedWords.filter((word) =>
     [word.word, word.meaning].some((value) => value.normalize("NFC").toLocaleLowerCase().includes(query)),
   ), [sortedWords, query]);
+  useFocusEffect(useCallback(() => {
+    if (getCardReturn(languageId)) {
+      setSearch("");
+      setSearchOpen(false);
+    }
+  }, [languageId]));
+  const { highlight, onScrollToIndexFailed, onHighlightComplete } = useWordListReturn(languageId, visibleWords, list, listHeight);
 
   useFocusEffect(useCallback(() => {
     let isActive = true;
@@ -136,8 +147,12 @@ export default function LanguageWordsScreen() {
       ) : null}
 
       <FlatList
+        ref={list}
+        onLayout={(event) => setListHeight(event.nativeEvent.layout.height)}
+        ListFooterComponent={<View style={{ height: listHeight }} />}
+        onScrollToIndexFailed={onScrollToIndexFailed}
         data={visibleWords}
-        extraData={showMeanings}
+        extraData={{ showMeanings, highlight }}
         keyExtractor={(word) => word.id}
         initialNumToRender={16}
         maxToRenderPerBatch={12}
@@ -151,6 +166,8 @@ export default function LanguageWordsScreen() {
           label={word.word}
           meaning={word.meaning}
           showMeaning={showMeanings}
+          highlightSequence={highlight?.id === word.id ? highlight.sequence : 0}
+          onHighlightComplete={onHighlightComplete}
           onPress={() => router.push({
             pathname: "/[wordId]",
             params: { wordId: word.id, languageId },

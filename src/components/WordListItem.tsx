@@ -1,16 +1,30 @@
 import { Fonts, FontSizes, Palette, Spacing } from "@/constants/theme";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { useEffect } from "react";
+import { Animated, Pressable, StyleSheet, Text, useAnimatedValue } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
 type Props = {
   label: string;
   meaning?: string;
   showMeaning?: boolean;
+  highlightSequence?: number;
+  onHighlightComplete?: (sequence: number) => void;
   onPress: () => void;
   onEdit: () => void;
 };
 
-export function WordListItem({ label, meaning, showMeaning = true, onPress, onEdit }: Props) {
+export function WordListItem({ label, meaning, showMeaning = true, highlightSequence = 0, onHighlightComplete, onPress, onEdit }: Props) {
+  const highlight = useAnimatedValue(0);
+  useEffect(() => {
+    if (!highlightSequence) return;
+    const animation = Animated.sequence([
+      Animated.timing(highlight, { toValue: 1, duration: 100, useNativeDriver: true }),
+      Animated.delay(120),
+      Animated.timing(highlight, { toValue: 0, duration: 550, useNativeDriver: true }),
+    ]);
+    animation.start(({ finished }) => { if (finished) onHighlightComplete?.(highlightSequence); });
+    return () => { animation.stop(); highlight.setValue(0); };
+  }, [highlightSequence, highlight, onHighlightComplete]);
   return (
     <ReanimatedSwipeable
       friction={1}
@@ -33,6 +47,7 @@ export function WordListItem({ label, meaning, showMeaning = true, onPress, onEd
         onAccessibilityAction={(event) => {
           if (event.nativeEvent.actionName === "edit") onEdit();
         }}>
+        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.pressed, { opacity: highlight }]} />
         <Text style={styles.word}>{label}</Text>
         {showMeaning && meaning ? <Text style={styles.meaning} numberOfLines={2}>{meaning}</Text> : null}
       </Pressable>
