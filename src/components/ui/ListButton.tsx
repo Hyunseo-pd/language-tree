@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
+import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { Pressable, PressableProps, StyleSheet, Text } from "react-native";
 
 type ListButtonProps = PressableProps & {
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: Palette.textStrong,
-    fontFamily: Fonts.sans, fontSize: FontSizes.body,
-    fontWeight: "600",
+    fontFamily: Fonts.sans, fontSize: FontSizes.title,
+    fontWeight: "400",
   },
 });

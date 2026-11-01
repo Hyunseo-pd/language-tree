@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes, Spacing } from "@/constants/theme";
+import { Fonts, FontSizes, Palette, Spacing } from "@/constants/theme";
 import { PropsWithChildren, type ReactNode } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

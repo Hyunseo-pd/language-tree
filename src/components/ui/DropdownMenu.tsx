@@ -72,13 +72,13 @@ export function DropdownMenu<T extends string>({
 
 const styles = StyleSheet.create({
   container: { alignSelf: "center" },
-  trigger: { minHeight: 36, flexDirection: "row", alignItems: "center", backgroundColor: palette.white, borderWidth: 1, borderColor: palette.gray50, borderRadius: 9999, paddingHorizontal: 4, gap: 4 },
+  trigger: { minHeight: 36, flexDirection: "row", alignItems: "center", backgroundColor: palette.white, borderWidth: 1, borderColor: palette.gray50, borderRadius: 12, paddingHorizontal: 4, gap: 4 },
   label: { minWidth: 36, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.body, color: palette.text },
   icon: { width: 36, height: 36 },
   dimmed: { opacity: 0.6 },
   overlay: { flex: 1 },
-  menu: { position: "absolute", padding: 8, backgroundColor: palette.white, borderRadius: 18, borderWidth: 1, borderColor: palette.gray50, shadowColor: palette.text, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
-  option: { minHeight: 48, justifyContent: "center", paddingHorizontal: 16, borderRadius: 36 },
+  menu: { position: "absolute", padding: 8, backgroundColor: palette.white, borderRadius: 12, borderWidth: 1, borderColor: palette.gray50, shadowColor: palette.text, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
+  option: { minHeight: 48, justifyContent: "center", paddingHorizontal: 8, borderRadius: 12 },
   selected: { backgroundColor: palette.icon },
   optionLabel: { color: palette.text, fontFamily: Fonts.sans, fontSize: FontSizes.label },
   selectedLabel: { color: palette.background },

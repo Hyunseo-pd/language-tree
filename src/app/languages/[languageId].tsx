@@ -1,6 +1,6 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { IconButton } from "@/components/ui/IconButton";
+import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
 import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
@@ -200,11 +200,11 @@ function SearchHeader({ value, onChange, onCancel }: {
 }
 
 const styles = StyleSheet.create({
-  toolbar: { flexDirection: "row", alignItems: "center", gap: 8 },
+  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 8, },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 4 },
   searchHeader: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 4 },
   searchSlot: { flex: 1, height: 44, alignItems: "flex-end" },
-  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", borderWidth: 1, borderColor: Palette.border, borderRadius: 24 },
+  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", borderWidth: 1, borderColor: Palette.border, borderRadius: 24, paddingHorizontal: 8},
   searchIcon: { width: 36, height: 36, marginRight: 3 },
   cancelText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.text },
   searchInput: { flex: 1, minWidth: 0, paddingHorizontal: 6, paddingVertical: 10, fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.text },

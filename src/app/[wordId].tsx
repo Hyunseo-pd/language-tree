@@ -308,7 +308,7 @@ function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean 
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.background },
-  screen: { flex: 1, paddingHorizontal: 21, paddingBottom: 34 },
+  screen: { flex: 1, paddingHorizontal: 16, paddingBottom: 34 },
   header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   icon: { width: 36, height: 36 },
