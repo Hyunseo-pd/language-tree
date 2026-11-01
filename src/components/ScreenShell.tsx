@@ -8,15 +8,16 @@ type ScreenShellProps = PropsWithChildren<{
   subtitle?: string;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
+  headerContent?: ReactNode;
   toolbar?: ReactNode;
 }>;
 
-export function ScreenShell({ title, subtitle, headerLeft, headerRight, toolbar, children }: ScreenShellProps) {
+export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerContent, toolbar, children }: ScreenShellProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          {headerLeft || headerRight ? (
+          {headerContent ?? (headerLeft || headerRight ? (
             <View style={styles.headerRow}>
               <View style={styles.headerSide}>{headerLeft}</View>
               <Text style={[styles.title, styles.centeredTitle]} numberOfLines={1}>
@@ -24,7 +25,7 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, toolbar,
               </Text>
               <View style={styles.headerSide}>{headerRight}</View>
             </View>
-          ) : <Text style={styles.title}>{title}</Text>}
+          ) : <Text style={styles.title}>{title}</Text>)}
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
         {toolbar ? <View style={styles.toolbar}>{toolbar}</View> : null}

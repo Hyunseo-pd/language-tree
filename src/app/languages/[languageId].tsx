@@ -2,8 +2,8 @@ import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { Image } from "expo-image";
 import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
+import { ActivityIndicator, Animated, Keyboard, Pressable, StyleSheet, Text, TextInput, useAnimatedValue, View } from "react-native";
 
 import { ScreenShell } from "@/components/ScreenShell";
 import { WordListItem } from "@/components/WordListItem";
@@ -77,6 +77,13 @@ export default function LanguageWordsScreen() {
   return (
     <ScreenShell
       title={title}
+      headerContent={searchOpen ? (
+        <SearchHeader value={search} onChange={setSearch} onCancel={() => {
+          setSearchOpen(false);
+          setSearch("");
+          Keyboard.dismiss();
+        }} />
+      ) : undefined}
       headerLeft={
         <Link href="/" dismissTo asChild>
           <Pressable
@@ -94,16 +101,12 @@ export default function LanguageWordsScreen() {
       }
       headerRight={
         <View style={styles.headerActions}>
-          <Pressable accessibilityRole="button" accessibilityLabel={searchOpen ? "검색 닫기" : "검색 열기"}
-            accessibilityState={{ expanded: searchOpen }}
+          <Pressable accessibilityRole="button" accessibilityLabel="검색 열기"
             onPress={() => {
-              setSearchOpen(!searchOpen);
-              if (searchOpen) {
-                setSearch("");
-                Keyboard.dismiss();
-              }
+              setSortMenuOpen(false);
+              setSearchOpen(true);
             }}
-            style={({ pressed }) => [styles.actionButton, (pressed || searchOpen) && styles.menuButtonPressed]}>
+            style={({ pressed }) => [styles.actionButton, pressed && styles.menuButtonPressed]}>
             <Image source={require("../../../assets/icons/wordnote/search.png")} style={styles.actionIcon} contentFit="contain" />
           </Pressable>
           <Link push href={{ pathname: "/add-word", params: { languageId } } as Href} asChild>
@@ -118,26 +121,6 @@ export default function LanguageWordsScreen() {
         <View style={styles.toolbar}>
           <WordSortDropdown value={sort.order} onChange={selectSort}
             open={sortMenuOpen} onOpenChange={setSortMenuOpen} />
-          {searchOpen ? <View style={styles.searchBox}>
-            <TextInput
-              autoFocus
-              value={search}
-              onChangeText={setSearch}
-              placeholder="단어·뜻 검색"
-              accessibilityLabel="단어와 뜻 검색"
-              placeholderTextColor={Palette.placeholder}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="search"
-              style={styles.searchInput}
-            />
-            {search.length > 0 ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="검색어 지우기"
-                onPress={() => setSearch("")} style={styles.clearButton}>
-                <Text style={styles.clearText}>×</Text>
-              </Pressable>
-            ) : null}
-          </View> : null}
         </View>
       }
     >
@@ -175,10 +158,57 @@ export default function LanguageWordsScreen() {
   );
 }
 
+function SearchHeader({ value, onChange, onCancel }: {
+  value: string;
+  onChange: (value: string) => void;
+  onCancel: () => void;
+}) {
+  const progress = useAnimatedValue(0);
+  const input = useRef<ComponentRef<typeof TextInput>>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!width) return;
+    const animation = Animated.timing(progress, { toValue: 1, duration: 220, useNativeDriver: false });
+    animation.start(({ finished }) => { if (finished) input.current?.focus(); });
+    return () => animation.stop();
+  }, [progress, width]);
+
+  return (
+    <View style={styles.searchHeader}>
+      <View style={styles.searchSlot} onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
+        <Animated.View style={[styles.searchBox, {
+          width: progress.interpolate({ inputRange: [0, 1], outputRange: [44, Math.max(44, width)] }),
+        }]}>
+          <TextInput ref={input} value={value} onChangeText={onChange}
+            placeholder="단어·뜻 검색" accessibilityLabel="단어와 뜻 검색"
+            placeholderTextColor={Palette.placeholder} autoCapitalize="none" autoCorrect={false}
+            returnKeyType="search" style={styles.searchInput} />
+          {value.length > 0 ? (
+            <Pressable accessibilityRole="button" accessibilityLabel="검색어 지우기"
+              onPress={() => onChange("")} style={styles.clearButton}>
+              <Text style={styles.clearText}>×</Text>
+            </Pressable>
+          ) : null}
+          <Image source={require("../../../assets/icons/wordnote/search.png")} style={styles.searchIcon} contentFit="contain" />
+        </Animated.View>
+      </View>
+      <Pressable accessibilityRole="button" accessibilityLabel="검색 취소" onPress={onCancel}
+        style={({ pressed }) => [styles.actionButton, pressed && styles.menuButtonPressed]}>
+        <Text style={styles.cancelText}>취소</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   toolbar: { flexDirection: "row", alignItems: "center", gap: 8 },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 4 },
-  searchBox: { flex: 1, minWidth: 0, minHeight: 44, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: Palette.border, borderRadius: 24, paddingLeft: 8 },
+  searchHeader: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 4 },
+  searchSlot: { flex: 1, height: 44, alignItems: "flex-end" },
+  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", borderWidth: 1, borderColor: Palette.border, borderRadius: 24 },
+  searchIcon: { width: 36, height: 36, marginRight: 3 },
+  cancelText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.text },
   searchInput: { flex: 1, minWidth: 0, paddingHorizontal: 6, paddingVertical: 10, fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.text },
   clearButton: { width: 32, minHeight: 44, alignItems: "center", justifyContent: "center" },
   clearText: { fontSize: FontSizes.heading, color: Palette.textMuted },
