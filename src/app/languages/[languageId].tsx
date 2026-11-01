@@ -6,15 +6,7 @@ import { NavButton } from "@/components/NavButton";
 import { ScreenShell } from "@/components/ScreenShell";
 import { WordListItem } from "@/components/WordListItem";
 import { getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
-
-function shuffleWordIds(words: WordItem[]): string[] {
-  const ids = words.map(({ id }) => id);
-  for (let i = ids.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [ids[i], ids[j]] = [ids[j], ids[i]];
-  }
-  return ids;
-}
+import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
 
 export default function LanguageWordsScreen() {
   const { languageId, languageName } = useLocalSearchParams<{
@@ -22,9 +14,8 @@ export default function LanguageWordsScreen() {
     languageName?: string;
   }>();
   const [language, setLanguage] = useState<{ id: string; name: string } | null>(null);
-  const [sortOrder, setSortOrder] = useState<"alphabetical" | "date" | "random">("alphabetical");
+  const sort = useWordSort(languageId);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
-  const [randomIds, setRandomIds] = useState<string[]>([]);
   const [words, setWords] = useState<WordItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,35 +37,12 @@ export default function LanguageWordsScreen() {
     return unsubscribe;
   }, [languageId]);
 
-  function selectSort(order: "alphabetical" | "date" | "random") {
-    if (order === "random") {
-      setRandomIds(shuffleWordIds(words));
-    }
-    setSortOrder(order);
+  function selectSort(order: WordSortOrder) {
+    selectWordSort(languageId, order, words);
     setSortMenuOpen(false);
   }
 
-  const sortedWords = useMemo(() => {
-    const randomRanks = new Map(randomIds.map((id, index) => [id, index]));
-    return [...words].sort((a, b) => {
-      if (sortOrder === "random") {
-        const difference = (randomRanks.get(a.id) ?? Infinity) - (randomRanks.get(b.id) ?? Infinity);
-        if (difference) return difference;
-      }
-      if (sortOrder === "date") {
-        const aDate = a.savedAt ?? a.createdAt;
-        const bDate = b.savedAt ?? b.createdAt;
-        if (aDate === undefined && bDate !== undefined) return 1;
-        if (aDate !== undefined && bDate === undefined) return -1;
-        if (aDate !== undefined && bDate !== undefined && aDate !== bDate) {
-          return bDate - aDate;
-        }
-      }
-
-      return a.word.localeCompare(b.word, undefined, { sensitivity: "base" })
-        || a.id.localeCompare(b.id);
-    });
-  }, [words, sortOrder, randomIds]);
+  const sortedWords = useMemo(() => sortWords(words, sort), [words, sort]);
 
   useFocusEffect(useCallback(() => {
     let isActive = true;
@@ -138,11 +106,11 @@ export default function LanguageWordsScreen() {
           <Pressable
             key={option.value}
             accessibilityRole="button"
-            accessibilityState={{ selected: sortOrder === option.value }}
+            accessibilityState={{ selected: sort.order === option.value }}
             onPress={() => selectSort(option.value)}
-            style={[styles.sortButton, sortOrder === option.value && styles.sortButtonSelected]}
+            style={[styles.sortButton, sort.order === option.value && styles.sortButtonSelected]}
           >
-            <Text style={[styles.sortLabel, sortOrder === option.value && styles.sortLabelSelected]}>
+            <Text style={[styles.sortLabel, sort.order === option.value && styles.sortLabelSelected]}>
               {option.label}
             </Text>
           </Pressable>

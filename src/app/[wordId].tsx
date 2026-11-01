@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams, type Href } from "expo-router";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
+import { sortWords, useWordSort } from "@/lib/wordSort";
 
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
@@ -68,7 +69,8 @@ export default function WordCardScreen() {
     return unsubscribe;
   }, [languageId]);
 
-  const words = firebaseWords;
+  const sort = useWordSort(languageId);
+  const words = useMemo(() => sortWords(firebaseWords, sort), [firebaseWords, sort]);
 
   const selectedIndex = Math.max(
     0,
