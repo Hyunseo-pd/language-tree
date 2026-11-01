@@ -1,5 +1,6 @@
 // WordNote / page / card_front (Figma 86:699).
 export const WordnoteColors = {
+  white: '#FFFFFF',
   background: '#FDFBF3',
   text: '#000000',
   icon: '#4C4C4C',
@@ -12,5 +13,6 @@ export const WordnoteIcons = {
   previous: require('../../assets/icons/wordnote/previous.png'),
   next: require('../../assets/icons/wordnote/next.png'),
   edit: require('../../assets/icons/wordnote/edit.png'),
-  sort: require('../../assets/icons/wordnote/chevron-down.png'),
+  sort: require('../../assets/icons/wordnote/down.png'),
+  sortUp: require('../../assets/icons/wordnote/up.png'),
 } as const;

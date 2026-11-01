@@ -1,6 +1,6 @@
-import { Image } from "expo-image";
-import { useFonts } from "expo-font";
 import { WordnoteColors as palette, WordnoteIcons } from "@/constants/wordnote";
+import { useFonts } from "expo-font";
+import { Image } from "expo-image";
 import { Link, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
@@ -198,7 +198,7 @@ export default function WordCardScreen() {
             }}
           >
             <Text style={styles.sortLabel}>정렬</Text>
-            <Image source={WordnoteIcons.sort} style={[styles.icon, sortMenuOpen && { transform: [{ rotate: "180deg" }] }]} contentFit="contain" />
+            <Image source={sortMenuOpen ? WordnoteIcons.sortUp : WordnoteIcons.sort} style={styles.icon} contentFit="contain" />
           </Pressable>
         </View>
 
@@ -347,19 +347,19 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.background },
   screen: { flex: 1, paddingHorizontal: 21, paddingBottom: 34 },
   header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  icon: { width: 48, height: 48 },
-  iconButton: { width: 48, height: 48, alignItems: "center", justifyContent: "center" },
-  sortButton: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: palette.secondary, borderRadius: 5 },
-  sortLabel: { width: 48, textAlign: "center", fontFamily: "Inter", fontSize: 16, color: palette.text },
+  icon: { width: 36, height: 36 },
+  iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
+  sortButton: { flexDirection: "row", alignItems: "center",backgroundColor: palette.white, borderWidth: 1, borderColor: palette.secondary, borderRadius: 18 , paddingHorizontal: 4, gap: 4 },
+  sortLabel: { width:36, textAlign: "center", fontFamily: "Inter", fontSize: 16, color: palette.text },
   counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: "Inter", fontSize: 20, lineHeight: 24, color: palette.text },
   menuBackdrop: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, zIndex: 10 },
-  sortMenu: { position: "absolute", top: 56, right: 21, zIndex: 11, width: 200, padding: 8, gap: 4, backgroundColor: palette.background, borderRadius: 5, borderWidth: 1, borderColor: palette.secondary },
+  sortMenu: { position: "absolute", top: 56, right: 21, zIndex: 11, width: 200, padding: 8, gap: 4, backgroundColor: palette.white, borderRadius: 5, borderWidth: 1, borderColor: palette.secondary },
   sortOption: { minHeight: 48, justifyContent: "center", paddingHorizontal: 16, borderRadius: 5 },
   sortOptionSelected: { backgroundColor: palette.icon },
   editLabel: { color: palette.text, fontFamily: "Inter", fontSize: 15 },
   sortOptionLabelSelected: { color: palette.background },
   cardViewport: { flex: 1, marginTop: 4, marginHorizontal: -12, paddingHorizontal: 12, overflow: "hidden" },
-  card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderColor: palette.secondary, borderWidth: 1, borderRadius: 5, boxShadow: "2px 2px 12px rgba(0, 0, 0, 0.12)" },
+  card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderColor: palette.secondary, borderWidth: 1, borderRadius: 5, boxShadow: "2px 0px 0px rgba(0, 0, 0, 0.2)" },
   previewCard: { position: "absolute", top: 0, bottom: 0, left: 12, right: 12 },
   cardFace: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", borderRadius: 5, backgroundColor: palette.background, backfaceVisibility: "hidden" },
   word: { color: palette.text, fontFamily: "Inter", fontSize: 45, fontWeight: "700", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
