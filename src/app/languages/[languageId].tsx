@@ -1,8 +1,9 @@
+import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { NavButton } from "@/components/NavButton";
+import { ListButton } from "@/components/ui/ListButton";
 import { ScreenShell } from "@/components/ScreenShell";
 import { WordListItem } from "@/components/WordListItem";
 import { getLanguageName, subscribeToWords, type WordItem } from "@/lib/languageStore";
@@ -39,7 +40,6 @@ export default function LanguageWordsScreen() {
 
   function selectSort(order: WordSortOrder) {
     selectWordSort(languageId, order, words);
-    setSortMenuOpen(false);
   }
 
   const sortedWords = useMemo(() => sortWords(words, sort), [words, sort]);
@@ -86,38 +86,12 @@ export default function LanguageWordsScreen() {
         </Link>
       }
       headerRight={
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="단어 정렬"
-          accessibilityState={{ expanded: sortMenuOpen }}
-          style={styles.headerButton}
-          onPress={() => setSortMenuOpen((open) => !open)}
-        >
-          <Text style={styles.headerLabel}>{sortMenuOpen ? "정렬 ▴" : "정렬 ▾"}</Text>
-        </Pressable>
+        <WordSortDropdown value={sort.order} onChange={selectSort}
+          open={sortMenuOpen} onOpenChange={setSortMenuOpen} />
       }
     >
-      {sortMenuOpen ? <View style={styles.sortControls}>
-        {([
-          { value: "alphabetical", label: "알파벳순" },
-          { value: "date", label: "날짜순 (최신순)" },
-          { value: "random", label: "랜덤" },
-        ] as const).map((option) => (
-          <Pressable
-            key={option.value}
-            accessibilityRole="button"
-            accessibilityState={{ selected: sort.order === option.value }}
-            onPress={() => selectSort(option.value)}
-            style={[styles.sortButton, sort.order === option.value && styles.sortButtonSelected]}
-          >
-            <Text style={[styles.sortLabel, sort.order === option.value && styles.sortLabelSelected]}>
-              {option.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View> : null}
       <Link push href={{ pathname: "/add-word", params: { languageId } } as Href} asChild>
-        <NavButton label="＋ 단어 추가" />
+        <ListButton label="＋ 단어 추가" />
       </Link>
       {isLoading ? (
         <View style={styles.centerState}>
@@ -169,35 +143,6 @@ const styles = StyleSheet.create({
     height: 2,
     borderRadius: 1,
     backgroundColor: "#111111",
-  },
-  headerButton: { minWidth: 48, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: "#f3f4f6" },
-  headerLabel: { fontSize: 15, fontWeight: "600", color: "#17212f" },
-  sortControls: {
-    gap: 8,
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: "#f3f4f6",
-  },
-  sortButton: {
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#cccccc",
-  },
-  sortButtonSelected: {
-    backgroundColor: "#111111",
-    borderColor: "#111111",
-  },
-  sortLabel: {
-    color: "#444444",
-    fontSize: 14,
-  },
-  sortLabelSelected: {
-    color: "#ffffff",
-    fontWeight: "600",
   },
   centerState: {
     alignItems: "center",

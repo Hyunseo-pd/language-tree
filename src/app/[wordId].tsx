@@ -1,3 +1,4 @@
+import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { WordnoteColors as palette, WordnoteIcons } from "@/constants/wordnote";
 import { useFonts } from "expo-font";
 import { Image } from "expo-image";
@@ -117,7 +118,6 @@ export default function WordCardScreen() {
     // Anchor the visible word before publishing the new shared order.
     if (currentWord) setSelection({ routeKey, id: currentWord.id });
     selectWordSort(languageId, order, firebaseWords);
-    setSortMenuOpen(false);
   }
 
   const canInteract = Boolean(currentWord) && !isLoading && !errorMessage;
@@ -187,44 +187,14 @@ export default function WordCardScreen() {
             {words.length === 0 ? 0 : index + 1}/{words.length}
           </Text>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={"\uC815\uB82C"}
-            accessibilityState={{ expanded: sortMenuOpen }}
+          <WordSortDropdown
+            value={sort.order}
+            onChange={changeSort}
+            open={sortMenuOpen}
+            onOpenChange={(open) => { if (!open || !transitioning.get()) setSortMenuOpen(open); }}
             disabled={!canInteract}
-            style={styles.sortButton}
-            onPress={() => {
-              if (!transitioning.get()) setSortMenuOpen((open) => !open);
-            }}
-          >
-            <Text style={styles.sortLabel}>정렬</Text>
-            <Image source={sortMenuOpen ? WordnoteIcons.sortUp : WordnoteIcons.sort} style={styles.icon} contentFit="contain" />
-          </Pressable>
+          />
         </View>
-
-        {sortMenuOpen ? (
-          <>
-            <Pressable style={styles.menuBackdrop} accessibilityRole="button"
-              accessibilityLabel={"\uC815\uB82C \uBA54\uB274 \uB2EB\uAE30"}
-              onPress={() => setSortMenuOpen(false)} />
-            <View style={styles.sortMenu}>
-              {([
-                { value: "alphabetical", label: "\uC54C\uD30C\uBCB3\uC21C" },
-                { value: "date", label: "\uB0A0\uC9DC\uC21C (\uCD5C\uC2E0\uC21C)" },
-                { value: "random", label: "\uB79C\uB364" },
-              ] as const).map((option) => (
-                <Pressable key={option.value} accessibilityRole="button"
-                  accessibilityState={{ selected: sort.order === option.value }}
-                  onPress={() => changeSort(option.value)}
-                  style={[styles.sortOption, sort.order === option.value && styles.sortOptionSelected]}>
-                  <Text style={[styles.editLabel, sort.order === option.value && styles.sortOptionLabelSelected]}>
-                    {option.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </>
-        ) : null}
 
         <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
         <View style={styles.cardViewport} onLayout={(event) => { cardWidth.set(event.nativeEvent.layout.width - 24); }}>
@@ -349,15 +319,7 @@ const styles = StyleSheet.create({
   header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   icon: { width: 36, height: 36 },
   iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  sortButton: { flexDirection: "row", alignItems: "center",backgroundColor: palette.white, borderWidth: 1, borderColor: palette.secondary, borderRadius: 18 , paddingHorizontal: 4, gap: 4 },
-  sortLabel: { width:36, textAlign: "center", fontFamily: "Inter", fontSize: 16, color: palette.text },
   counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: "Inter", fontSize: 20, lineHeight: 24, color: palette.text },
-  menuBackdrop: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, zIndex: 10 },
-  sortMenu: { position: "absolute", top: 56, right: 21, zIndex: 11, width: 200, padding: 8, gap: 4, backgroundColor: palette.white, borderRadius: 5, borderWidth: 1, borderColor: palette.secondary },
-  sortOption: { minHeight: 48, justifyContent: "center", paddingHorizontal: 16, borderRadius: 5 },
-  sortOptionSelected: { backgroundColor: palette.icon },
-  editLabel: { color: palette.text, fontFamily: "Inter", fontSize: 15 },
-  sortOptionLabelSelected: { color: palette.background },
   cardViewport: { flex: 1, marginTop: 4, marginHorizontal: -12, paddingHorizontal: 12, overflow: "hidden" },
   card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderColor: palette.secondary, borderWidth: 1, borderRadius: 5, boxShadow: "2px 0px 0px rgba(0, 0, 0, 0.2)" },
   previewCard: { position: "absolute", top: 0, bottom: 0, left: 12, right: 12 },

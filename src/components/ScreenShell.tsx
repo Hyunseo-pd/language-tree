@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   headerSide: {
-    width: 48,
+    minWidth: 48,
   },
   centeredTitle: {
     flex: 1,

@@ -1,10 +1,10 @@
 import { Pressable, PressableProps, StyleSheet, Text } from "react-native";
 
-type NavButtonProps = PressableProps & {
+type ListButtonProps = PressableProps & {
   label: string;
 };
 
-export function NavButton({ label, style, ...props }: NavButtonProps) {
+export function ListButton({ label, style, ...props }: ListButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -22,7 +22,7 @@ export function NavButton({ label, style, ...props }: NavButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderColor: "#CCCCCC",
     justifyContent: "center",
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   pressed: {
-    opacity: 0.72,
+    opacity:1,
   },
   label: {
     color: "#111111",

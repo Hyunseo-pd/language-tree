@@ -1,5 +1,5 @@
 import { FolderNameDialog } from "@/components/FolderNameDialog";
-import { NavButton } from "@/components/NavButton";
+import { ListButton } from "@/components/ui/ListButton";
 import { Folder } from "@/components/Folder";
 import { ScreenShell } from "@/components/ScreenShell";
 import { createLanguage, renameLanguage, getLanguages, type LanguageFolder } from "@/lib/languageStore";
@@ -40,7 +40,7 @@ export default function LanguagesHomeScreen() {
   }, []));
   return (
     <ScreenShell title="언어 목록" subtitle={errorMessage ?? (isLoading ? "불러오는 중..." : "단어장을 선택하세요")}>
-      <NavButton label="＋ 폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
+      <ListButton label="＋ 폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
       {languages.map((language) => (
         <Link
           push

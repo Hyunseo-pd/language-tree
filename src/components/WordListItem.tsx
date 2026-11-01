@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
-import { NavButton } from "@/components/NavButton";
+import { ListButton } from "@/components/ui/ListButton";
 
 type Props = {
   label: string;
@@ -25,7 +25,7 @@ export function WordListItem({ label, onPress, onEdit }: Props) {
         </Pressable>
       )}
     >
-      <NavButton label={label} onPress={onPress}
+      <ListButton label={label} onPress={onPress}
         accessibilityHint="누르면 카드를 봅니다. 왼쪽으로 밀면 편집 버튼이 나타납니다."
         accessibilityActions={[{ name: "edit", label: "단어 편집" }]}
         onAccessibilityAction={(event) => {
