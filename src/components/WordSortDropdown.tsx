@@ -2,8 +2,9 @@ import { DropdownMenu, type DropdownMenuProps } from "@/components/ui/DropdownMe
 import type { WordSortOrder } from "@/lib/wordSort";
 
 const options = [
+    { value: "date", label: "날짜순 (최신순)" },
   { value: "alphabetical", label: "알파벳순" },
-  { value: "date", label: "날짜순 (최신순)" },
+
   { value: "random", label: "랜덤" },
 ] as const;
 

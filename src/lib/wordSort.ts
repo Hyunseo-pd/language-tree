@@ -6,7 +6,7 @@ export type WordSortOrder = "alphabetical" | "date" | "random";
 type WordSort = { order: WordSortOrder; randomIds: readonly string[] };
 
 // Session-only, per-language preferences shared by the list and card screens.
-const defaultSort: WordSort = { order: "alphabetical", randomIds: [] };
+const defaultSort: WordSort = { order: "date", randomIds: [] };
 const preferences = new Map<string, WordSort>();
 const listeners = new Set<() => void>();
 function subscribe(listener: () => void) {

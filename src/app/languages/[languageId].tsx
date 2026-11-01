@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: "row", alignItems: "center", gap: 4 },
   searchHeader: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 4 },
   searchSlot: { flex: 1, height: 44, alignItems: "flex-end" },
-  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", borderWidth: 1, borderColor: Palette.border, borderRadius: 24, paddingHorizontal: 8},
+  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", backgroundColor: Palette.white, borderWidth: 1, borderColor: Palette.border, borderRadius: 24, paddingHorizontal: 8},
   searchIcon: { width: 36, height: 36, marginRight: 3 },
   cancelText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.text },
   searchInput: { flex: 1, minWidth: 0, paddingHorizontal: 6, paddingVertical: 10, fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.text },
