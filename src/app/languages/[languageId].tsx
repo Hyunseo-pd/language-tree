@@ -22,6 +22,7 @@ export default function LanguageWordsScreen() {
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [showMeanings, setShowMeanings] = useState(true);
   const [words, setWords] = useState<WordItem[]>(() => getCachedWords(languageId) ?? []);
   const [isLoading, setIsLoading] = useState(() => !getCachedWords(languageId));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -107,6 +108,12 @@ export default function LanguageWordsScreen() {
       }
       toolbar={
         <View style={styles.toolbar}>
+          <Pressable accessibilityRole="switch" accessibilityLabel="뜻 표시"
+            accessibilityState={{ checked: showMeanings }}
+            onPress={() => setShowMeanings((previous) => !previous)}
+            style={({ pressed }) => [styles.meaningToggle, pressed && styles.menuButtonPressed]}>
+            <Text style={styles.meaningToggleText}>{showMeanings ? "뜻 숨기기" : "뜻 보기"}</Text>
+          </Pressable>
           <WordSortDropdown value={sort.order} onChange={selectSort}
             open={sortMenuOpen} onOpenChange={setSortMenuOpen} />
         </View>
@@ -130,6 +137,7 @@ export default function LanguageWordsScreen() {
 
       <FlatList
         data={visibleWords}
+        extraData={showMeanings}
         keyExtractor={(word) => word.id}
         initialNumToRender={16}
         maxToRenderPerBatch={12}
@@ -141,6 +149,8 @@ export default function LanguageWordsScreen() {
         <WordListItem
           key={word.id}
           label={word.word}
+          meaning={word.meaning}
+          showMeaning={showMeanings}
           onPress={() => router.push({
             pathname: "/[wordId]",
             params: { wordId: word.id, languageId },
@@ -200,7 +210,9 @@ function SearchHeader({ value, onChange, onCancel }: {
 }
 
 const styles = StyleSheet.create({
-  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 8, },
+  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, },
+  meaningToggle: { minHeight: 44, justifyContent: "center", paddingHorizontal: 8, borderRadius: 12 },
+  meaningToggleText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.textMuted },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 4 },
   searchHeader: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 4 },
   searchSlot: { flex: 1, height: 44, alignItems: "flex-end" },
