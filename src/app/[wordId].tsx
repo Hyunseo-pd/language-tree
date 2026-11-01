@@ -181,9 +181,13 @@ export default function WordCardScreen() {
               <Image source={WordnoteIcons.back} style={styles.icon} contentFit="contain" />
             </Pressable>
           </Link>
-          <Text pointerEvents="none" style={styles.counter}>
-            {words.length === 0 ? 0 : index + 1}/{words.length}
-          </Text>
+          <Link dismissTo href={languageId ? (`/languages/${encodeURIComponent(languageId)}` as Href) : "/"} asChild>
+            <Pressable accessibilityRole="button" accessibilityLabel="단어 목록으로" style={styles.counterButton}>
+              <Text style={styles.counter}>
+                {words.length === 0 ? 0 : index + 1}/{words.length}
+              </Text>
+            </Pressable>
+          </Link>
           <View style={styles.headerActions}>
             <DeleteButton placement="below" onDelete={removeCurrentWord} disabled={!canInteract || !languageId}
               accessibilityLabel="단어 삭제 메뉴" />
@@ -309,7 +313,8 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   icon: { width: 36, height: 36 },
   iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.text },
+  counterButton: { position: "absolute", left: 88, right: 88, minHeight: 44, alignItems: "center", justifyContent: "center" },
+  counter: { textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.text },
   cardViewport: { flex: 1, marginTop: 4, marginHorizontal: -12, paddingHorizontal: 12, overflow: "hidden" ,paddingVertical: 8 },
   card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderRadius: 10, },
   previewCard: { position: "absolute", top: 8, bottom: 8, left: 12, right: 12 },
