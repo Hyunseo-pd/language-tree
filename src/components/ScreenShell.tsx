@@ -8,9 +8,10 @@ type ScreenShellProps = PropsWithChildren<{
   subtitle?: string;
   headerLeft?: ReactNode;
   headerRight?: ReactNode;
+  toolbar?: ReactNode;
 }>;
 
-export function ScreenShell({ title, subtitle, headerLeft, headerRight, children }: ScreenShellProps) {
+export function ScreenShell({ title, subtitle, headerLeft, headerRight, toolbar, children }: ScreenShellProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -26,10 +27,13 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, children
           ) : <Text style={styles.title}>{title}</Text>}
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
+        {toolbar ? <View style={styles.toolbar}>{toolbar}</View> : null}
         <ScrollView
           style={styles.scroller}
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {children}
         </ScrollView>
@@ -39,6 +43,7 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, children
 }
 
 const styles = StyleSheet.create({
+  toolbar: { marginBottom: 16 },
   safeArea: {
     flex: 1,
     backgroundColor: Palette.white,
