@@ -1,3 +1,6 @@
+import { Image } from "expo-image";
+import { useFonts } from "expo-font";
+import { WordnoteColors as palette, WordnoteIcons } from "@/constants/wordnote";
 import { Link, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
@@ -17,6 +20,7 @@ import { getWordDetails } from "@/lib/wordFields";
 import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
 
 export default function WordCardScreen() {
+  const [fontsLoaded, fontError] = useFonts({ Inter: require("../../assets/fonts/Inter/Inter.ttf") });
   const { wordId, languageId } = useLocalSearchParams<{
     wordId?: string;
     languageId?: string;
@@ -158,7 +162,7 @@ export default function WordCardScreen() {
     });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, !fontsLoaded && !fontError && { opacity: 0 }]}>
       <View style={styles.screen}>
         <View style={styles.header}>
           <Link
@@ -175,14 +179,7 @@ export default function WordCardScreen() {
               accessibilityLabel={"\uB2E8\uC5B4 \uBAA9\uB85D\uC73C\uB85C"}
               style={styles.iconButton}
             >
-              <View style={styles.listIcon}>
-                {[0, 1, 2].map((row) => (
-                  <View key={row} style={styles.listIconRow}>
-                    <View style={styles.listIconDot} />
-                    <View style={styles.listIconLine} />
-                  </View>
-                ))}
-              </View>
+              <Image source={WordnoteIcons.back} style={styles.icon} contentFit="contain" />
             </Pressable>
           </Link>
 
@@ -195,12 +192,13 @@ export default function WordCardScreen() {
             accessibilityLabel={"\uC815\uB82C"}
             accessibilityState={{ expanded: sortMenuOpen }}
             disabled={!canInteract}
-            style={styles.editButton}
+            style={styles.sortButton}
             onPress={() => {
               if (!transitioning.get()) setSortMenuOpen((open) => !open);
             }}
           >
-            <Text style={styles.editLabel}>{sortMenuOpen ? "\uC815\uB82C \u25B4" : "\uC815\uB82C \u25BE"}</Text>
+            <Text style={styles.sortLabel}>정렬</Text>
+            <Image source={WordnoteIcons.sort} style={[styles.icon, sortMenuOpen && { transform: [{ rotate: "180deg" }] }]} contentFit="contain" />
           </Pressable>
         </View>
 
@@ -229,18 +227,18 @@ export default function WordCardScreen() {
         ) : null}
 
         <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
-        <View style={styles.cardViewport} onLayout={(event) => { cardWidth.set(event.nativeEvent.layout.width); }}>
+        <View style={styles.cardViewport} onLayout={(event) => { cardWidth.set(event.nativeEvent.layout.width - 24); }}>
         {canInteract && previousWord && nextWord ? (
           <>
             <Animated.View style={[styles.card, styles.previewCard, previousStyle]} pointerEvents="none"
               accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
               <Text style={styles.word}>{previousWord.word}</Text>
-              <Text style={styles.hint}>{"\uD130\uCE58\uD574\uC11C \uB73B \uBCF4\uAE30"}</Text>
+              <Text style={styles.hint}>{"터치해서 뒤집기"}</Text>
             </Animated.View>
             <Animated.View style={[styles.card, styles.previewCard, nextStyle]} pointerEvents="none"
               accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
               <Text style={styles.word}>{nextWord.word}</Text>
-              <Text style={styles.hint}>{"\uD130\uCE58\uD574\uC11C \uB73B \uBCF4\uAE30"}</Text>
+              <Text style={styles.hint}>{"터치해서 뒤집기"}</Text>
             </Animated.View>
           </>
         ) : null}
@@ -283,6 +281,9 @@ export default function WordCardScreen() {
         </GestureDetector>
 
         <View style={styles.footer}>
+          <Pressable accessibilityRole="button" accessibilityLabel="이전 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showPrevious(); }}>
+            <Image source={WordnoteIcons.previous} style={styles.icon} contentFit="contain" />
+          </Pressable>
             <Link
               href={
                 {
@@ -292,8 +293,11 @@ export default function WordCardScreen() {
               }
               asChild
             >
-              <Pressable accessibilityRole="button" accessibilityLabel={"\uB2E8\uC5B4 \uD3B8\uC9D1"} disabled={!currentWord} style={styles.editButton}><Text style={styles.editLabel}>{"\uD3B8\uC9D1"}</Text></Pressable>
+              <Pressable accessibilityRole="button" accessibilityLabel="단어 편집" disabled={!canInteract} style={styles.iconButton}><Image source={WordnoteIcons.edit} style={styles.icon} contentFit="contain" /></Pressable>
             </Link>
+          <Pressable accessibilityRole="button" accessibilityLabel="다음 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showNext(); }}>
+            <Image source={WordnoteIcons.next} style={styles.icon} contentFit="contain" />
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
@@ -320,7 +324,7 @@ function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean 
     <View style={StyleSheet.absoluteFill} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Animated.View style={[styles.cardFace, frontStyle]} pointerEvents={showMeaning ? "none" : "auto"}>
         <Text style={styles.word}>{word.word}</Text>
-        <Text style={styles.hint}>터치해서 뜻 보기</Text>
+        <Text style={styles.hint}>터치해서 뒤집기</Text>
       </Animated.View>
       <Animated.View style={[styles.cardFace, backStyle]} pointerEvents={showMeaning ? "auto" : "none"}>
         <ScrollView style={styles.detailScroll} contentContainerStyle={styles.details} nestedScrollEnabled>
@@ -340,149 +344,35 @@ function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean 
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  screen: {
-    flex: 1,
-    paddingBottom: 28,
-    paddingHorizontal: 22,
-    paddingTop: 18,
-  },
-  header: {
-    alignItems: "center",
-    flexDirection: "row",
-    height: 58,
-    justifyContent: "space-between",
-  },
-  editButton: {
-    minHeight: 44,
-    minWidth: 52,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
-    backgroundColor: "#f1f3f5",
-  },
-  editLabel: {
-    color: "#111111",
-    fontSize: 15,
-    fontWeight: "600",
-  },
+  safeArea: { flex: 1, backgroundColor: palette.background },
+  screen: { flex: 1, paddingHorizontal: 21, paddingBottom: 34 },
+  header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  icon: { width: 48, height: 48 },
+  iconButton: { width: 48, height: 48, alignItems: "center", justifyContent: "center" },
+  sortButton: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: palette.secondary, borderRadius: 5 },
+  sortLabel: { width: 48, textAlign: "center", fontFamily: "Inter", fontSize: 16, color: palette.text },
+  counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: "Inter", fontSize: 20, lineHeight: 24, color: palette.text },
   menuBackdrop: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, zIndex: 10 },
-  sortMenu: {
-    position: "absolute", top: 76, right: 22, zIndex: 11,
-    width: 200, padding: 8, gap: 4,
-    backgroundColor: "#f1f3f5", borderRadius: 14,
-    borderWidth: 1, borderColor: "#d1d5db",
-  },
-  sortOption: { minHeight: 48, justifyContent: "center", paddingHorizontal: 16, borderRadius: 10 },
-  sortOptionSelected: { backgroundColor: "#111111" },
-  sortOptionLabelSelected: { color: "#ffffff" },
-  counter: {
-    color: "#000000",
-    fontSize: 32,
-    fontWeight: "400",
-  },
-  cardViewport: {
-    flex: 1,
-    marginTop: 14,
-    overflow: "hidden",
-  },
-  card: {
-    alignItems: "center",
-    borderColor: "#8f8f8f",
-    borderRadius: 20,
-    borderWidth: 1,
-    flex: 1,
-    justifyContent: "center",
-    position: "relative",
-  },
-  previewCard: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: "#ffffff",
-  },
-  cardFace: {
-    position: "absolute", top: 0, right: 0, bottom: 0, left: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 20,
-    backgroundColor: "#ffffff",
-    backfaceVisibility: "hidden",
-  },
-  detailScroll: { flex: 1, width: "100%", borderRadius: 20 },
+  sortMenu: { position: "absolute", top: 56, right: 21, zIndex: 11, width: 200, padding: 8, gap: 4, backgroundColor: palette.background, borderRadius: 5, borderWidth: 1, borderColor: palette.secondary },
+  sortOption: { minHeight: 48, justifyContent: "center", paddingHorizontal: 16, borderRadius: 5 },
+  sortOptionSelected: { backgroundColor: palette.icon },
+  editLabel: { color: palette.text, fontFamily: "Inter", fontSize: 15 },
+  sortOptionLabelSelected: { color: palette.background },
+  cardViewport: { flex: 1, marginTop: 4, marginHorizontal: -12, paddingHorizontal: 12, overflow: "hidden" },
+  card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderColor: palette.secondary, borderWidth: 1, borderRadius: 5, boxShadow: "2px 2px 12px rgba(0, 0, 0, 0.12)" },
+  previewCard: { position: "absolute", top: 0, bottom: 0, left: 12, right: 12 },
+  cardFace: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", borderRadius: 5, backgroundColor: palette.background, backfaceVisibility: "hidden" },
+  word: { color: palette.text, fontFamily: "Inter", fontSize: 45, fontWeight: "700", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
+  hint: { marginTop: 16, fontFamily: "Inter", fontSize: 20, lineHeight: 24, color: palette.secondary, textAlign: "center" },
+  detailScroll: { flex: 1, width: "100%", borderRadius: 5 },
   details: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 20 },
-  backWord: { fontSize: 22, fontWeight: "600", color: "#6b7280", textAlign: "center" },
-  meaning: { fontSize: 30, fontWeight: "700", color: "#111111", textAlign: "center", lineHeight: 42 },
-  detail: { gap: 6, borderTopWidth: 1, borderTopColor: "#e5e7eb", paddingTop: 16 },
-  detailLabel: { color: "#6b7280", fontSize: 14, fontWeight: "600" },
-  detailValue: { color: "#17212f", fontSize: 18, lineHeight: 28 },
-  word: {
-    color: "#000000",
-    fontSize: 40,
-    fontWeight: "800",
-    lineHeight: 66,
-    paddingHorizontal: 44,
-    textAlign: "center",
-  },
-  hint: {
-    marginTop: 16,
-    fontSize: 14,
-    color: "#888888",
-    textAlign: "center",
-  },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    height: 78,
-    justifyContent: "flex-end",
-    paddingHorizontal: 12,
-  },
-  listIcon: {
-    gap: 5,
-  },
-  listIconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  listIconDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: "#111111",
-  },
-  listIconLine: {
-    width: 19,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: "#111111",
-  },
-  iconButton: {
-    alignItems: "center",
-    height: 52,
-    justifyContent: "center",
-    minWidth: 52,
-  },
-  centerState: {
-    alignItems: "center",
-    gap: 10,
-  },
-  errorText: {
-    color: "#b00020",
-    fontSize: 14,
-    lineHeight: 20,
-    paddingHorizontal: 24,
-    textAlign: "center",
-  },
-  stateText: {
-    color: "#666666",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "center",
-  },
+  backWord: { fontFamily: "Inter", fontSize: 22, fontWeight: "600", color: palette.secondary, textAlign: "center" },
+  meaning: { fontSize: 30, fontWeight: "700", color: palette.text, textAlign: "center", lineHeight: 42 },
+  detail: { gap: 6, borderTopWidth: 1, borderTopColor: palette.secondary, paddingTop: 16 },
+  detailLabel: { color: palette.secondary, fontSize: 14, fontWeight: "600" },
+  detailValue: { color: palette.icon, fontSize: 18, lineHeight: 28 },
+  footer: { height: 48, marginTop: 4, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  centerState: { alignItems: "center", gap: 10 },
+  errorText: { color: "#b00020", fontSize: 14, lineHeight: 20, paddingHorizontal: 24, textAlign: "center" },
+  stateText: { color: palette.icon, fontSize: 15, lineHeight: 22, textAlign: "center" },
 });
