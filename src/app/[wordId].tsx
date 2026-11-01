@@ -1,6 +1,6 @@
+import { Palette as palette, Palette, Fonts, FontSizes } from "@/constants/theme";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
-import { WordnoteColors as palette, WordnoteIcons } from "@/constants/wordnote";
-import { useFonts } from "expo-font";
+import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
 import { Link, useLocalSearchParams, type Href } from "expo-router";
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
@@ -21,7 +21,6 @@ import { getWordDetails } from "@/lib/wordFields";
 import { selectWordSort, sortWords, useWordSort, type WordSortOrder } from "@/lib/wordSort";
 
 export default function WordCardScreen() {
-  const [fontsLoaded, fontError] = useFonts({ Inter: require("../../assets/fonts/Inter/Inter.ttf") });
   const { wordId, languageId } = useLocalSearchParams<{
     wordId?: string;
     languageId?: string;
@@ -162,7 +161,7 @@ export default function WordCardScreen() {
     });
 
   return (
-    <SafeAreaView style={[styles.safeArea, !fontsLoaded && !fontError && { opacity: 0 }]}>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
         <View style={styles.header}>
           <Link
@@ -319,22 +318,22 @@ const styles = StyleSheet.create({
   header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   icon: { width: 36, height: 36 },
   iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: "Inter", fontSize: 20, lineHeight: 24, color: palette.text },
+  counter: { position: "absolute", left: 48, right: 48, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.text },
   cardViewport: { flex: 1, marginTop: 4, marginHorizontal: -12, paddingHorizontal: 12, overflow: "hidden" },
   card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderColor: palette.secondary, borderWidth: 1, borderRadius: 5, boxShadow: "2px 0px 0px rgba(0, 0, 0, 0.2)" },
   previewCard: { position: "absolute", top: 0, bottom: 0, left: 12, right: 12 },
   cardFace: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", borderRadius: 5, backgroundColor: palette.background, backfaceVisibility: "hidden" },
-  word: { color: palette.text, fontFamily: "Inter", fontSize: 45, fontWeight: "700", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
-  hint: { marginTop: 16, fontFamily: "Inter", fontSize: 20, lineHeight: 24, color: palette.secondary, textAlign: "center" },
+  word: { color: palette.text, fontFamily: Fonts.sans, fontSize: FontSizes.word, fontWeight: "700", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
+  hint: { marginTop: 16, fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.secondary, textAlign: "center" },
   detailScroll: { flex: 1, width: "100%", borderRadius: 5 },
   details: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 20 },
-  backWord: { fontFamily: "Inter", fontSize: 22, fontWeight: "600", color: palette.secondary, textAlign: "center" },
-  meaning: { fontSize: 30, fontWeight: "700", color: palette.text, textAlign: "center", lineHeight: 42 },
+  backWord: { fontFamily: Fonts.sans, fontSize: FontSizes.wordLabel, fontWeight: "600", color: palette.secondary, textAlign: "center" },
+  meaning: { fontFamily: Fonts.sans, fontSize: FontSizes.meaning, fontWeight: "700", color: palette.text, textAlign: "center", lineHeight: 42 },
   detail: { gap: 6, borderTopWidth: 1, borderTopColor: palette.secondary, paddingTop: 16 },
-  detailLabel: { color: palette.secondary, fontSize: 14, fontWeight: "600" },
-  detailValue: { color: palette.icon, fontSize: 18, lineHeight: 28 },
+  detailLabel: { color: palette.secondary, fontFamily: Fonts.sans, fontSize: FontSizes.small, fontWeight: "600" },
+  detailValue: { color: palette.icon, fontFamily: Fonts.sans, fontSize: FontSizes.detail, lineHeight: 28 },
   footer: { height: 48, marginTop: 4, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   centerState: { alignItems: "center", gap: 10 },
-  errorText: { color: "#b00020", fontSize: 14, lineHeight: 20, paddingHorizontal: 24, textAlign: "center" },
-  stateText: { color: palette.icon, fontSize: 15, lineHeight: 22, textAlign: "center" },
+  errorText: { color: Palette.error, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, paddingHorizontal: 24, textAlign: "center" },
+  stateText: { color: palette.icon, fontFamily: Fonts.sans, fontSize: FontSizes.label, lineHeight: 22, textAlign: "center" },
 });

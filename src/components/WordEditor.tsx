@@ -1,3 +1,4 @@
+import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { router, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -133,7 +134,7 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
                   <Text style={styles.label}>{field.label}</Text>
                   <TextInput accessibilityLabel={field.label} value={fields[field.key]}
                     onChangeText={(value) => changeField(field.key, value)} editable={!isSaving}
-                    placeholder={field.placeholder} placeholderTextColor="#9299a3"
+                    placeholder={field.placeholder} placeholderTextColor={Palette.placeholder}
                     autoCapitalize="none" autoCorrect={false} multiline={field.multiline}
                     style={[styles.input, field.multiline && styles.multiline]} />
                 </View>
@@ -162,7 +163,7 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
                   <Text style={styles.label}>{label}</Text>
                   <TextInput accessibilityLabel={label} value={fields[key]}
                     onChangeText={(value) => changeField(key, value)} editable={!isSaving}
-                    placeholder={placeholder} placeholderTextColor="#9299a3"
+                    placeholder={placeholder} placeholderTextColor={Palette.placeholder}
                     autoCapitalize="none" autoCorrect={false} multiline
                     style={[styles.input, styles.multiline]} />
                 </View>
@@ -174,7 +175,7 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
               </Text>
               <Pressable accessibilityRole="button" disabled={!languageId || !valid || !dirty || isSaving}
                 onPress={save} style={[styles.save, (!languageId || !valid || !dirty || isSaving) && styles.disabled]}>
-                {isSaving ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.saveLabel}>{wordId ? "변경사항 저장" : "단어 추가"}</Text>}
+                {isSaving ? <ActivityIndicator color={Palette.white} /> : <Text style={styles.saveLabel}>{wordId ? "변경사항 저장" : "단어 추가"}</Text>}
               </Pressable>
             </>
           ) : null}
@@ -185,31 +186,31 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#ffffff" },
+  safeArea: { flex: 1, backgroundColor: Palette.white },
   screen: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 12, gap: 8 },
-  headerButton: { minWidth: 52, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: "#f3f4f6" },
-  back: { fontSize: 32, color: "#17212f" },
+  headerButton: { minWidth: 52, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: Palette.surfaceMuted },
+  back: { fontFamily: Fonts.sans, fontSize: FontSizes.display, color: Palette.textInput },
   headerButtonSpace: { width: 52, minHeight: 48 },
-  headerLabel: { fontSize: 15, fontWeight: "600", color: "#17212f" },
-  title: { flex: 1, textAlign: "center", fontSize: 21, fontWeight: "700", color: "#17212f" },
+  headerLabel: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textInput },
+  title: { flex: 1, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.heading, fontWeight: "700", color: Palette.textInput },
   content: { padding: 24, gap: 22, paddingBottom: 48 },
   loading: { marginTop: 48 },
-  description: { color: "#6b7280", fontSize: 14, lineHeight: 22 },
+  description: { color: Palette.textHint, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
   field: { gap: 10 },
   options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: "#dce1e7", borderRadius: 12 },
-  optionSelected: { backgroundColor: "#17212f", borderColor: "#17212f" },
-  optionLabel: { color: "#283445", fontSize: 15 },
-  optionLabelSelected: { color: "#ffffff" },
-  label: { fontSize: 15, fontWeight: "600", color: "#283445" },
-  input: { borderWidth: 1, borderColor: "#dce1e7", backgroundColor: "#f8fafc", borderRadius: 14, padding: 16, minHeight: 56, fontSize: 17, color: "#17212f" },
+  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 12 },
+  optionSelected: { backgroundColor: Palette.textInput, borderColor: Palette.textInput },
+  optionLabel: { color: Palette.textLabel, fontFamily: Fonts.sans, fontSize: FontSizes.label },
+  optionLabelSelected: { color: Palette.white },
+  label: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textLabel },
+  input: { borderWidth: 1, borderColor: Palette.borderInput, backgroundColor: Palette.surfaceInput, borderRadius: 14, padding: 16, minHeight: 56, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.textInput },
   multiline: { minHeight: 112, textAlignVertical: "top" },
-  hint: { fontSize: 13, lineHeight: 20, color: "#6b7280" },
-  success: { fontSize: 13, color: "#18734b" },
-  error: { color: "#b42318", fontSize: 14, lineHeight: 22 },
-  save: { minHeight: 54, borderRadius: 14, backgroundColor: "#17212f", alignItems: "center", justifyContent: "center" },
+  hint: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, lineHeight: 20, color: Palette.textHint },
+  success: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, color: Palette.success },
+  error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
+  save: { minHeight: 54, borderRadius: 14, backgroundColor: Palette.textInput, alignItems: "center", justifyContent: "center" },
   disabled: { opacity: 0.4 },
-  saveLabel: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
-  secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: "#f3f4f6", borderRadius: 12 },
+  saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600" },
+  secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: Palette.surfaceMuted, borderRadius: 12 },
 });

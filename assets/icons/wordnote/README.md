@@ -18,6 +18,6 @@ The SVG files are the original inner vectors for reuse. Their intrinsic
 dimensions differ from the complete icon frames; they are not drop-in
 replacements for the PNGs.
 
-Palette: `WordnoteColors` in `src/constants/wordnote.ts`.
+Palette: `Palette` in `src/constants/theme.ts`.
 Font: `assets/fonts/Inter/Inter.ttf`, with its license in `OFL.txt`.
 Inter is sourced from https://github.com/google/fonts/tree/main/ofl/inter.

@@ -1,3 +1,4 @@
+import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { PropsWithChildren, type ReactNode } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,7 +41,7 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, children
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: Palette.white,
   },
   container: {
     flex: 1,
@@ -65,13 +66,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   title: {
-    color: "#111111",
-    fontSize: 28,
+    color: Palette.textStrong,
+    fontFamily: Fonts.sans, fontSize: FontSizes.title,
     fontWeight: "700",
   },
   subtitle: {
-    color: "#666666",
-    fontSize: 16,
+    color: Palette.textMuted,
+    fontFamily: Fonts.sans, fontSize: FontSizes.body,
   },
   scroller: {
     flex: 1,

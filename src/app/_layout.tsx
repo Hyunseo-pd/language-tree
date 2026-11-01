@@ -1,3 +1,5 @@
+import { useFonts } from "expo-font";
+import { FontAssets, Palette } from "@/constants/theme";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
@@ -6,6 +8,9 @@ export const unstable_settings = {
 };
 
 export default function Layout() {
+  const [fontsLoaded, fontError] = useFonts(FontAssets);
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack
@@ -14,7 +19,7 @@ export default function Layout() {
           animation: "slide_from_right",
           animationTypeForReplace: "pop",
           gestureEnabled: true,
-          contentStyle: { backgroundColor: "#ffffff" },
+          contentStyle: { backgroundColor: Palette.white },
         }}
       />
     </GestureHandlerRootView>

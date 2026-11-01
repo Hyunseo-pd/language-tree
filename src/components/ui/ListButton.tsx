@@ -1,3 +1,4 @@
+import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { Pressable, PressableProps, StyleSheet, Text } from "react-native";
 
 type ListButtonProps = PressableProps & {
@@ -22,9 +23,9 @@ export function ListButton({ label, style, ...props }: ListButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Palette.white,
     borderBottomWidth: 1,
-    borderColor: "#CCCCCC",
+    borderColor: Palette.borderSubtle,
     justifyContent: "center",
     minHeight: 52,
     paddingHorizontal: 16,
@@ -33,8 +34,8 @@ const styles = StyleSheet.create({
     opacity:1,
   },
   label: {
-    color: "#111111",
-    fontSize: 16,
+    color: Palette.textStrong,
+    fontFamily: Fonts.sans, fontSize: FontSizes.body,
     fontWeight: "600",
   },
 });

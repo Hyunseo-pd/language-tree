@@ -1,3 +1,4 @@
+import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
 import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   menuButtonPressed: {
-    backgroundColor: "#eeeeee",
+    backgroundColor: Palette.surfacePressed,
   },
   menuIcon: {
     gap: 5,
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 2,
     borderRadius: 1,
-    backgroundColor: "#111111",
+    backgroundColor: Palette.textStrong,
   },
   centerState: {
     alignItems: "center",
@@ -150,13 +151,13 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   errorText: {
-    color: "#b00020",
-    fontSize: 14,
+    color: Palette.error,
+    fontFamily: Fonts.sans, fontSize: FontSizes.small,
     lineHeight: 20,
   },
   stateText: {
-    color: "#666666",
-    fontSize: 15,
+    color: Palette.textMuted,
+    fontFamily: Fonts.sans, fontSize: FontSizes.label,
     lineHeight: 22,
   },
 });

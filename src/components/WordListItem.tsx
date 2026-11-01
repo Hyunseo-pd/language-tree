@@ -1,3 +1,4 @@
+import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { Pressable, StyleSheet, Text } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
@@ -36,7 +37,7 @@ export function WordListItem({ label, onPress, onEdit }: Props) {
 }
 
 const styles = StyleSheet.create({
-  foreground: { backgroundColor: "#ffffff" },
-  editButton: { width: 80, alignItems: "center", justifyContent: "center", backgroundColor: "#666666" },
-  editLabel: { color: "#ffffff", fontSize: 13, fontWeight: "600" },
+  foreground: { backgroundColor: Palette.white },
+  editButton: { width: 80, alignItems: "center", justifyContent: "center", backgroundColor: Palette.textMuted },
+  editLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.helper, fontWeight: "600" },
 });

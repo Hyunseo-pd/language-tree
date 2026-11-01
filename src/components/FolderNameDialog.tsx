@@ -1,3 +1,4 @@
+import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { useRef, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -36,7 +37,7 @@ export function FolderNameDialog({ initialName, title, onClose, onSave }: Props)
         <View style={styles.dialog} accessibilityViewIsModal>
           <Text style={styles.title}>{title}</Text>
           <TextInput autoFocus accessibilityLabel="폴더 이름" placeholder="폴더 이름을 입력하세요"
-            placeholderTextColor="#9299a3" value={name} onChangeText={setName} editable={!saving}
+            placeholderTextColor={Palette.placeholder} value={name} onChangeText={setName} editable={!saving}
             autoCorrect={false} returnKeyType="done" onSubmitEditing={save} style={styles.input} />
           {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
           <View style={styles.actions}>
@@ -45,7 +46,7 @@ export function FolderNameDialog({ initialName, title, onClose, onSave }: Props)
             </Pressable>
             <Pressable accessibilityRole="button" accessibilityLabel="저장" disabled={saving || !name.trim()}
               onPress={save} style={[styles.button, styles.save, (saving || !name.trim()) && styles.disabled]}>
-              {saving ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.saveLabel}>저장</Text>}
+              {saving ? <ActivityIndicator color={Palette.white} /> : <Text style={styles.saveLabel}>저장</Text>}
             </Pressable>
           </View>
         </View>
@@ -56,13 +57,13 @@ export function FolderNameDialog({ initialName, title, onClose, onSave }: Props)
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "rgba(0,0,0,0.4)" },
-  dialog: { alignSelf: "center", width: "100%", maxWidth: 420, padding: 24, borderRadius: 20, backgroundColor: "#ffffff", gap: 20 },
-  title: { fontSize: 21, fontWeight: "700", color: "#17212f" },
-  input: { minHeight: 56, borderWidth: 1, borderColor: "#dce1e7", borderRadius: 12, padding: 16, fontSize: 17, color: "#17212f" },
+  dialog: { alignSelf: "center", width: "100%", maxWidth: 420, padding: 24, borderRadius: 20, backgroundColor: Palette.white, gap: 20 },
+  title: { fontFamily: Fonts.sans, fontSize: FontSizes.heading, fontWeight: "700", color: Palette.textInput },
+  input: { minHeight: 56, borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 12, padding: 16, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.textInput },
   actions: { flexDirection: "row", gap: 12 },
-  button: { flex: 1, minHeight: 48, borderRadius: 12, backgroundColor: "#f3f4f6", justifyContent: "center", alignItems: "center" },
-  save: { backgroundColor: "#17212f" },
-  saveLabel: { color: "#ffffff", fontWeight: "600" },
+  button: { flex: 1, minHeight: 48, borderRadius: 12, backgroundColor: Palette.surfaceMuted, justifyContent: "center", alignItems: "center" },
+  save: { backgroundColor: Palette.textInput },
+  saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600" },
   disabled: { opacity: 0.4 },
-  error: { color: "#b42318", fontSize: 14 },
+  error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small },
 });
