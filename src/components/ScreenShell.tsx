@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
+import { Palette, Fonts, FontSizes, Spacing } from "@/constants/theme";
 import { PropsWithChildren, type ReactNode } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,13 +10,14 @@ type ScreenShellProps = PropsWithChildren<{
   headerRight?: ReactNode;
   headerContent?: ReactNode;
   toolbar?: ReactNode;
+  compact?: boolean;
 }>;
 
-export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerContent, toolbar, children }: ScreenShellProps) {
+export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerContent, toolbar, compact = false, children }: ScreenShellProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
+    <SafeAreaView style={[styles.safeArea, compact && styles.compactSafeArea]}>
+      <View style={[styles.container, compact && styles.compactContainer]}>
+        <View style={[styles.header, compact && styles.compactHeader]}>
           {headerContent ?? (headerLeft || headerRight ? (
             <View style={styles.headerRow}>
               <View style={styles.headerSide}>{headerLeft}</View>
@@ -28,10 +29,10 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerCo
           ) : <Text style={styles.title}>{title}</Text>)}
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
-        {toolbar ? <View style={styles.toolbar}>{toolbar}</View> : null}
+        {toolbar ? <View style={[styles.toolbar, compact && styles.compactToolbar]}>{toolbar}</View> : null}
         <ScrollView
           style={styles.scroller}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, compact && styles.compactContent]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
@@ -44,6 +45,11 @@ export function ScreenShell({ title, subtitle, headerLeft, headerRight, headerCo
 }
 
 const styles = StyleSheet.create({
+  compactSafeArea: { backgroundColor: Palette.background },
+  compactContainer: { paddingHorizontal: Spacing.three, paddingTop: 0, paddingBottom: Spacing.two },
+  compactHeader: { marginBottom: Spacing.two },
+  compactToolbar: { marginBottom: Spacing.two },
+  compactContent: { gap: 0, paddingBottom: Spacing.three },
   toolbar: { marginBottom: 16 },
   safeArea: {
     flex: 1,

@@ -1,4 +1,7 @@
 export const WordnoteIcons = {
+  menuHorizontal: require('../../assets/icons/wordnote/menu_horizontal.png'),
+  search: require('../../assets/icons/wordnote/search.png'),
+  plus: require('../../assets/icons/wordnote/plus.png'),
   trash: require('../../assets/icons/wordnote/trash.png'),
   back: require('../../assets/icons/wordnote/back.png'),
   previous: require('../../assets/icons/wordnote/previous.png'),

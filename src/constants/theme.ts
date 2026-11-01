@@ -25,7 +25,7 @@ export const FontAssets = {
 export const FontSizes = {
   caption: 12, helper: 13, small: 14, label: 15, body: 16,
   input: 17, detail: 18, bodyLarge: 20, heading: 21, wordLabel: 22,
-  title: 28, meaning: 30, display: 32, word: 45, hero: 48,
+  title: 24, meaning: 30, display: 32, word: 45, hero: 48,
 } as const;
 
 export const Colors = {

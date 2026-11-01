@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
+import { Palette, Fonts, FontSizes, Spacing } from "@/constants/theme";
 import { Pressable, StyleSheet, Text } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 
@@ -27,6 +27,7 @@ export function WordListItem({ label, onPress, onEdit }: Props) {
       )}
     >
       <ListButton label={label} onPress={onPress}
+        style={styles.row}
         accessibilityHint="누르면 카드를 봅니다. 왼쪽으로 밀면 편집 버튼이 나타납니다."
         accessibilityActions={[{ name: "edit", label: "단어 편집" }]}
         onAccessibilityAction={(event) => {
@@ -37,7 +38,8 @@ export function WordListItem({ label, onPress, onEdit }: Props) {
 }
 
 const styles = StyleSheet.create({
-  foreground: { backgroundColor: Palette.white },
+  foreground: { backgroundColor: Palette.background },
+  row: { backgroundColor: Palette.background, minHeight: 48, paddingHorizontal: Spacing.two },
   editButton: { width: 80, alignItems: "center", justifyContent: "center", backgroundColor: Palette.textMuted },
   editLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.helper, fontWeight: "600" },
 });

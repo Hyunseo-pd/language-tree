@@ -1,5 +1,7 @@
 import { Palette, Fonts, FontSizes } from "@/constants/theme";
 import { WordSortDropdown } from "@/components/WordSortDropdown";
+import { IconButton } from "@/components/ui/IconButton";
+import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
 import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
@@ -76,7 +78,8 @@ export default function LanguageWordsScreen() {
 
   return (
     <ScreenShell
-      title={title}
+      compact
+      title={isLoading ? title : `${title}(${words.length})`}
       headerContent={searchOpen ? (
         <SearchHeader value={search} onChange={setSearch} onCancel={() => {
           setSearchOpen(false);
@@ -86,34 +89,18 @@ export default function LanguageWordsScreen() {
       ) : undefined}
       headerLeft={
         <Link href="/" dismissTo asChild>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="언어 목록 메뉴"
-            style={({ pressed }) => [styles.menuButton, pressed && styles.menuButtonPressed]}
-          >
-            <View style={styles.menuIcon}>
-              <View style={styles.menuLine} />
-              <View style={styles.menuLine} />
-              <View style={styles.menuLine} />
-            </View>
-          </Pressable>
+          <IconButton icon="menuHorizontal" accessibilityLabel="언어 목록 메뉴" />
         </Link>
       }
       headerRight={
         <View style={styles.headerActions}>
-          <Pressable accessibilityRole="button" accessibilityLabel="검색 열기"
+          <IconButton icon="search" accessibilityLabel="검색 열기"
             onPress={() => {
               setSortMenuOpen(false);
               setSearchOpen(true);
-            }}
-            style={({ pressed }) => [styles.actionButton, pressed && styles.menuButtonPressed]}>
-            <Image source={require("../../../assets/icons/wordnote/search.png")} style={styles.actionIcon} contentFit="contain" />
-          </Pressable>
+            }} />
           <Link push href={{ pathname: "/add-word", params: { languageId } } as Href} asChild>
-            <Pressable accessibilityRole="button" accessibilityLabel="단어 추가"
-              style={({ pressed }) => [styles.actionButton, pressed && styles.menuButtonPressed]}>
-              <Image source={require("../../../assets/icons/wordnote/plus.png")} style={styles.actionIcon} contentFit="contain" />
-            </Pressable>
+            <IconButton icon="plus" accessibilityLabel="단어 추가" />
           </Link>
         </View>
       }
@@ -190,7 +177,7 @@ function SearchHeader({ value, onChange, onCancel }: {
               <Text style={styles.clearText}>×</Text>
             </Pressable>
           ) : null}
-          <Image source={require("../../../assets/icons/wordnote/search.png")} style={styles.searchIcon} contentFit="contain" />
+          <Image source={WordnoteIcons.search} style={styles.searchIcon} contentFit="contain" />
         </Animated.View>
       </View>
       <Pressable accessibilityRole="button" accessibilityLabel="검색 취소" onPress={onCancel}
@@ -213,25 +200,8 @@ const styles = StyleSheet.create({
   clearButton: { width: 32, minHeight: 44, alignItems: "center", justifyContent: "center" },
   clearText: { fontSize: FontSizes.heading, color: Palette.textMuted },
   actionButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
-  actionIcon: { width: 36, height: 36 },
-  menuButton: {
-    width: 48,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
-  },
   menuButtonPressed: {
     backgroundColor: Palette.surfacePressed,
-  },
-  menuIcon: {
-    gap: 5,
-  },
-  menuLine: {
-    width: 22,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: Palette.textStrong,
   },
   centerState: {
     alignItems: "center",
