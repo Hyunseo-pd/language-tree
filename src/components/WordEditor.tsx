@@ -8,6 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CustomFieldsEditor } from "@/components/CustomFieldsEditor";
+import { IconButton } from "@/components/ui/IconButton";
 import { createWord, getWord, updateWord } from "@/lib/languageStore";
 
 import { normalizeWordValues, optionalWordFields, type OptionalWordField, type WordDetail, type WordValues } from "@/lib/wordFields";
@@ -103,11 +104,9 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <View style={styles.header}>
-          <Pressable accessibilityRole="button" accessibilityLabel="단어 목록으로" disabled={isSaving}
+          <IconButton icon="back" accessibilityLabel="단어 목록으로" disabled={isSaving}
             style={styles.headerButton}
-            onPress={() => router.dismissTo(languageId ? `/languages/${encodeURIComponent(languageId)}` as Href : "/")}>
-            <Text style={styles.back}>{"\u2039"}</Text>
-          </Pressable>
+            onPress={() => router.dismissTo(languageId ? `/languages/${encodeURIComponent(languageId)}` as Href : "/")} />
           <Text style={styles.title}>{wordId ? "단어 편집" : "단어 추가"}</Text>
           {wordId ? <Pressable accessibilityRole="button" disabled={isLoading || isSaving || !original}
             style={styles.headerButton}
@@ -186,31 +185,31 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: Palette.white },
+  safeArea: { flex: 1, backgroundColor: Palette.background },
   screen: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 12, gap: 8 },
-  headerButton: { minWidth: 52, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: Palette.surfaceMuted },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 12, gap: 8 },
+  headerButton: { width: 48, minHeight: 48, alignItems: "center", justifyContent: "center" },
   back: { fontFamily: Fonts.sans, fontSize: FontSizes.display, color: Palette.textInput },
-  headerButtonSpace: { width: 52, minHeight: 48 },
+  headerButtonSpace: { width: 48, minHeight: 48 },
   headerLabel: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textInput },
-  title: { flex: 1, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.heading, fontWeight: "700", color: Palette.textInput },
-  content: { padding: 24, gap: 22, paddingBottom: 48 },
+  title: { flex: 1, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.title, fontWeight: "700", color: Palette.textStrong },
+  content: { paddingHorizontal: 16, paddingTop: 8, gap: 20, paddingBottom: 40 },
   loading: { marginTop: 48 },
   description: { color: Palette.textHint, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
-  field: { gap: 10 },
+  field: { gap: 8 },
   options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 12 },
+  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 6 },
   optionSelected: { backgroundColor: Palette.textInput, borderColor: Palette.textInput },
   optionLabel: { color: Palette.textLabel, fontFamily: Fonts.sans, fontSize: FontSizes.label },
   optionLabelSelected: { color: Palette.white },
   label: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textLabel },
-  input: { borderWidth: 1, borderColor: Palette.borderInput, backgroundColor: Palette.surfaceInput, borderRadius: 14, padding: 16, minHeight: 56, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.textInput },
+  input: { borderWidth: 1, borderColor: Palette.borderInput, backgroundColor: Palette.white, borderRadius: 6, padding: 16, minHeight: 56, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.textInput },
   multiline: { minHeight: 112, textAlignVertical: "top" },
   hint: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, lineHeight: 20, color: Palette.textHint },
   success: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, color: Palette.success },
   error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
-  save: { minHeight: 54, borderRadius: 14, backgroundColor: Palette.textInput, alignItems: "center", justifyContent: "center" },
+  save: { minHeight: 54, borderRadius: 6, backgroundColor: Palette.textInput, alignItems: "center", justifyContent: "center" },
   disabled: { opacity: 0.4 },
   saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600" },
-  secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: Palette.surfaceMuted, borderRadius: 12 },
+  secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: Palette.surfaceMuted, borderRadius: 6 },
 });
