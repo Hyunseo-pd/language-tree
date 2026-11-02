@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
+import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { Pressable, PressableProps, StyleSheet, Text, View } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 type FolderProps = PressableProps & {
@@ -61,24 +61,27 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.white,
   },
   button: {
-    alignItems: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
     borderBottomWidth: 1,
     borderColor: Palette.border,
-    justifyContent: "center",
+    justifyContent: "space-between",
+    gap: 12,
     minHeight: 52,
-    paddingHorizontal: 24,
+    paddingHorizontal: 8,
   },
   pressed: {
     opacity: 0.72,
   },
   label: {
+    flexShrink: 1,
     color: Palette.textStrong,
     fontSize: 24,
     fontWeight: "600",
   },
   wordCount: {
     color: Palette.textMuted,
-    fontFamily: Fonts.sans, fontSize: FontSizes.small,
+    fontFamily: Fonts.sans, fontSize: FontSizes.body,
     fontWeight: "400",
   },
   actions: {

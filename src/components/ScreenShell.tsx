@@ -58,12 +58,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   header: {
-    gap: 8,
-    marginBottom: 28,
+    marginBottom: 8,
   },
   headerRow: {
     flexDirection: "row",
@@ -79,11 +78,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   title: {
+    textAlign: "center",
     color: Palette.textStrong,
     fontFamily: Fonts.sans, fontSize: FontSizes.title,
     fontWeight: "700",
   },
   subtitle: {
+    textAlign: "center",
     color: Palette.textMuted,
     fontFamily: Fonts.sans, fontSize: FontSizes.body,
   },

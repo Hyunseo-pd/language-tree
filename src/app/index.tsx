@@ -1,8 +1,8 @@
-import { FolderNameDialog } from "@/components/FolderNameDialog";
-import { ListButton } from "@/components/ui/ListButton";
 import { Folder } from "@/components/Folder";
+import { FolderNameDialog } from "@/components/FolderNameDialog";
 import { ScreenShell } from "@/components/ScreenShell";
-import { createLanguage, renameLanguage, getLanguages, getCachedLanguages, type LanguageFolder } from "@/lib/languageStore";
+import { IconButton } from "@/components/ui/IconButton";
+import { createLanguage, getCachedLanguages, getLanguages, renameLanguage, type LanguageFolder } from "@/lib/languageStore";
 import { Link, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 
@@ -41,8 +41,13 @@ export default function LanguagesHomeScreen() {
     };
   }, []));
   return (
-    <ScreenShell title="언어 목록" subtitle={errorMessage ?? (isLoading ? "불러오는 중..." : "단어장을 선택하세요")}>
-      <ListButton label="＋ 폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
+    <ScreenShell
+      title="나의 언어"
+      
+      headerRight={
+        <IconButton icon="plus" accessibilityLabel="폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
+      }
+    >
       {languages.map((language) => (
         <Link
           push

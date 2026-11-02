@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     borderColor: Palette.borderSubtle,
     justifyContent: "center",
     minHeight: 52,
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   pressed: {
     opacity:1,
