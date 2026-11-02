@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   toolbar: { marginBottom: 16 },
   safeArea: {
     flex: 1,
-    backgroundColor: Palette.white,
+    backgroundColor: Palette.background,
   },
   container: {
     flex: 1,

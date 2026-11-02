@@ -5,6 +5,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { createLanguage, getCachedLanguages, getLanguages, renameLanguage, type LanguageFolder } from "@/lib/languageStore";
 import { Link, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
+import { View } from "react-native";
 
 export default function LanguagesHomeScreen() {
   const [editor, setEditor] = useState<{ language?: LanguageFolder } | null>(null);
@@ -48,6 +49,7 @@ export default function LanguagesHomeScreen() {
         <IconButton icon="plus" accessibilityLabel="폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
       }
     >
+      <View>
       {languages.map((language) => (
         <Link
           push
@@ -66,6 +68,7 @@ export default function LanguagesHomeScreen() {
           />
         </Link>
       ))}
+      </View>
       {editor ? (
         <FolderNameDialog
           title={editor.language ? "폴더 이름 변경" : "폴더 추가"}

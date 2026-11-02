@@ -58,7 +58,7 @@ export function Folder({ label, wordCount, style, onRename, onDelete, ...props }
 
 const styles = StyleSheet.create({
   foreground: {
-    backgroundColor: Palette.white,
+    backgroundColor: Palette.background,
   },
   button: {
     flexDirection: "row",
