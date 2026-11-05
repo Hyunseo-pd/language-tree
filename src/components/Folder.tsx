@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderColor: Palette.border,
+    borderColor: Palette.gray20,
     justifyContent: "space-between",
     gap: 12,
     minHeight: 52,
@@ -75,12 +75,12 @@ const styles = StyleSheet.create({
   },
   label: {
     flexShrink: 1,
-    color: Palette.textStrong,
+    color: Palette.text,
     fontSize: 24,
     fontWeight: "600",
   },
   wordCount: {
-    color: Palette.textMuted,
+    color: Palette.gray60,
     fontFamily: Fonts.sans, fontSize: FontSizes.body,
     fontWeight: "400",
   },
@@ -94,14 +94,14 @@ const styles = StyleSheet.create({
     width: 80,
   },
   rename: {
-    backgroundColor: Palette.textMuted,
+    backgroundColor: Palette.gray60,
   },
   delete: {
     backgroundColor: Palette.destructive,
   },
   actionLabel: {
     color: Palette.white,
-    fontFamily: Fonts.sans, fontSize: FontSizes.helper,
+    fontFamily: Fonts.sans, fontSize: FontSizes.small,
     fontWeight: "600",
   },
 });

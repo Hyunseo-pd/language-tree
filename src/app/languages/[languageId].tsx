@@ -207,7 +207,7 @@ function SearchHeader({ value, onChange, onCancel }: {
         }]}>
           <TextInput ref={input} value={value} onChangeText={onChange}
             placeholder="단어·뜻 검색" accessibilityLabel="단어와 뜻 검색"
-            placeholderTextColor={Palette.placeholder} autoCapitalize="none" autoCorrect={false}
+            placeholderTextColor={Palette.gray50} autoCapitalize="none" autoCorrect={false}
             returnKeyType="search" style={styles.searchInput} />
           {value.length > 0 ? (
             <Pressable accessibilityRole="button" accessibilityLabel="검색어 지우기"
@@ -229,19 +229,19 @@ function SearchHeader({ value, onChange, onCancel }: {
 const styles = StyleSheet.create({
   toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, },
   meaningToggle: { minHeight: 44, justifyContent: "center", paddingHorizontal: 8, borderRadius: 12 },
-  meaningToggleText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.textMuted },
+  meaningToggleText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.gray60 },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 4 },
   searchHeader: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 4 },
   searchSlot: { flex: 1, height: 44, alignItems: "flex-end" },
-  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", backgroundColor: Palette.white, borderWidth: 1, borderColor: Palette.border, borderRadius: 24, paddingHorizontal: 8},
+  searchBox: { height: 44, flexDirection: "row", alignItems: "center", overflow: "hidden", backgroundColor: Palette.white, borderWidth: 1, borderColor: Palette.gray20, borderRadius: 24, paddingHorizontal: 8},
   searchIcon: { width: 36, height: 36, marginRight: 3 },
   cancelText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.text },
   searchInput: { flex: 1, minWidth: 0, paddingHorizontal: 6, paddingVertical: 10, fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.text },
   clearButton: { width: 32, minHeight: 44, alignItems: "center", justifyContent: "center" },
-  clearText: { fontSize: FontSizes.heading, color: Palette.textMuted },
+  clearText: { fontSize: FontSizes.wordLabel, color: Palette.gray60 },
   actionButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
   menuButtonPressed: {
-    backgroundColor: Palette.surfacePressed,
+    backgroundColor: Palette.gray10,
   },
   centerState: {
     alignItems: "center",
@@ -254,8 +254,8 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   stateText: {
-    color: Palette.textMuted,
-    fontFamily: Fonts.sans, fontSize: FontSizes.label,
+    color: Palette.gray60,
+    fontFamily: Fonts.sans, fontSize: FontSizes.body,
     lineHeight: 22,
   },
 });

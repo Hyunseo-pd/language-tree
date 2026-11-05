@@ -133,7 +133,7 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
                   <Text style={styles.label}>{field.label}</Text>
                   <TextInput accessibilityLabel={field.label} value={fields[field.key]}
                     onChangeText={(value) => changeField(field.key, value)} editable={!isSaving}
-                    placeholder={field.placeholder} placeholderTextColor={Palette.placeholder}
+                    placeholder={field.placeholder} placeholderTextColor={Palette.gray50}
                     autoCapitalize="none" autoCorrect={false} multiline={field.multiline}
                     style={[styles.input, field.multiline && styles.multiline]} />
                 </View>
@@ -162,7 +162,7 @@ export function WordEditor({ wordId, languageId }: { wordId?: string; languageId
                   <Text style={styles.label}>{label}</Text>
                   <TextInput accessibilityLabel={label} value={fields[key]}
                     onChangeText={(value) => changeField(key, value)} editable={!isSaving}
-                    placeholder={placeholder} placeholderTextColor={Palette.placeholder}
+                    placeholder={placeholder} placeholderTextColor={Palette.gray50}
                     autoCapitalize="none" autoCorrect={false} multiline
                     style={[styles.input, styles.multiline]} />
                 </View>
@@ -189,27 +189,27 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingVertical: 12, gap: 8 },
   headerButton: { width: 48, minHeight: 48, alignItems: "center", justifyContent: "center" },
-  back: { fontFamily: Fonts.sans, fontSize: FontSizes.display, color: Palette.textInput },
+  back: { fontFamily: Fonts.sans, fontSize: FontSizes.display, color: Palette.text },
   headerButtonSpace: { width: 48, minHeight: 48 },
-  headerLabel: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textInput },
-  title: { flex: 1, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.title, fontWeight: "700", color: Palette.textStrong },
+  headerLabel: { fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600", color: Palette.text },
+  title: { flex: 1, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.title, fontWeight: "700", color: Palette.text },
   content: { paddingHorizontal: 16, paddingTop: 8, gap: 20, paddingBottom: 40 },
   loading: { marginTop: 48 },
-  description: { color: Palette.textHint, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
+  description: { color: Palette.gray60, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
   field: { gap: 8 },
   options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 6 },
-  optionSelected: { backgroundColor: Palette.textInput, borderColor: Palette.textInput },
-  optionLabel: { color: Palette.textLabel, fontFamily: Fonts.sans, fontSize: FontSizes.label },
+  option: { minHeight: 44, paddingHorizontal: 14, justifyContent: "center", borderWidth: 1, borderColor: Palette.gray20, borderRadius: 6 },
+  optionSelected: { backgroundColor: Palette.text, borderColor: Palette.text },
+  optionLabel: { color: Palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.body },
   optionLabelSelected: { color: Palette.white },
-  label: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textLabel },
-  input: { borderWidth: 1, borderColor: Palette.borderInput, backgroundColor: Palette.white, borderRadius: 6, padding: 16, minHeight: 56, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.textInput },
+  label: { fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600", color: Palette.gray70 },
+  input: { borderWidth: 1, borderColor: Palette.gray20, backgroundColor: Palette.white, borderRadius: 6, padding: 16, minHeight: 56, fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.text },
   multiline: { minHeight: 112, textAlignVertical: "top" },
-  hint: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, lineHeight: 20, color: Palette.textHint },
-  success: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, color: Palette.success },
+  hint: { fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, color: Palette.gray60 },
+  success: { fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.success },
   error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
-  save: { minHeight: 54, borderRadius: 6, backgroundColor: Palette.textInput, alignItems: "center", justifyContent: "center" },
+  save: { minHeight: 54, borderRadius: 6, backgroundColor: Palette.text, alignItems: "center", justifyContent: "center" },
   disabled: { opacity: 0.4 },
   saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600" },
-  secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: Palette.surfaceMuted, borderRadius: 6 },
+  secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: Palette.gray10, borderRadius: 6 },
 });

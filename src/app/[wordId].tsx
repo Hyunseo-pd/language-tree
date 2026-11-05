@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderRadius: 10, },
   previewCard: { position: "absolute", top: 8, bottom: 8, left: 12, right: 12 },
   cardFace: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: palette.background, backfaceVisibility: "hidden" , borderColor: palette.gray50, borderWidth: 1,  boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)"},
-  word: { color: palette.text, fontFamily: Fonts.word, fontSize: FontSizes.word, fontWeight: "800", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
+  word: { color: palette.text, fontFamily: Fonts.word, fontSize: FontSizes.hero, fontWeight: "800", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
   hint: { marginTop: 16, fontFamily: Fonts.sans, fontSize: FontSizes.body, lineHeight: 24, color: palette.gray50, textAlign: "center" },
   detailScroll: { flex: 1, width: "100%", borderRadius: 10 },
   details: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 20 },
@@ -335,5 +335,5 @@ const styles = StyleSheet.create({
   footer: { height: 48, marginTop: 4, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   centerState: { alignItems: "center", gap: 10 },
   errorText: { color: Palette.error, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, paddingHorizontal: 24, textAlign: "center" },
-  stateText: { color: palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.label, lineHeight: 22, textAlign: "center" },
+  stateText: { color: palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.body, lineHeight: 22, textAlign: "center" },
 });

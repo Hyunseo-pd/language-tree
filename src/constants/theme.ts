@@ -12,9 +12,6 @@ export const Palette = {
   gray50: '#8A8A8A', 
   gray20: '#D9D9D9',
   gray10: '#E5E5E5',
-  textHint: '#6B7280', placeholder: '#9299A3', border: '#CCCCCC',
-  borderSubtle: '#E5E5E5', borderInput: '#DCE1E7', surfaceInput: '#F8FAFC',
-  surfaceMuted: '#F3F4F6', surfacePressed: '#EEEEEE',
   error: '#B00020', errorStrong: '#B42318', destructive: '#D64545',
   success: '#18734B', link: '#3C87F7',
 } as const;
@@ -24,25 +21,24 @@ export const FontAssets = {
 } as const;
 
 export const FontSizes = {
-  caption: 12, helper: 13, small: 14, label: 15, body: 16,
-  input: 17, detail: 18, bodyLarge: 20, heading: 21, wordLabel: 22,
-  title: 24, meaning: 30, display: 32, word: 45, hero: 48,
+  caption: 12, small: 14, body: 16, detail: 18, bodyLarge: 20,
+  wordLabel: 22, title: 24, meaning: 30, display: 32, hero: 48,
 } as const;
 
 export const Colors = {
   light: {
     text: Palette.text,
     background: Palette.background,
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
+    backgroundElement: Palette.gray10,
+    backgroundSelected: Palette.gray20,
     textSecondary: Palette.gray50,
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: Palette.white,
+    background: Palette.text,
+    backgroundElement: Palette.gray70,
+    backgroundSelected: Palette.gray70,
+    textSecondary: Palette.gray50,
   },
 } as const;
 

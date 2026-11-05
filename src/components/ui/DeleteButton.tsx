@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   overlay: { flex: 1 },
   menu: { position: "absolute", padding:8, backgroundColor: Palette.white, borderWidth: 1, borderColor: Palette.gray50, borderRadius: 9999 },
   confirm: { minHeight: 36, alignItems: "center", justifyContent: "center", borderRadius: 9999 },
-  pressed: { backgroundColor: Palette.surfacePressed },
+  pressed: { backgroundColor: Palette.gray10 },
   label: { fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600", color: Palette.destructive },
   error: { fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.error, padding: 8 },
 });

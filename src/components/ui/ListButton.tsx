@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: Palette.white,
     borderBottomWidth: 1,
-    borderColor: Palette.borderSubtle,
+    borderColor: Palette.gray10,
     justifyContent: "center",
     minHeight: 52,
     paddingHorizontal: 8,
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     opacity:1,
   },
   label: {
-    color: Palette.textStrong,
+    color: Palette.text,
     fontFamily: Fonts.sans, fontSize: FontSizes.title,
     fontWeight: "400",
   },

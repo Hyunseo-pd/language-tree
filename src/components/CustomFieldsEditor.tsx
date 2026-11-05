@@ -76,7 +76,7 @@ export function CustomFieldsEditor({ languageId, fields, onChange, disabled }: P
       </View>
       {!loading && !loadError && !suggestions.length ? <Text style={styles.hint}>아직 사용한 항목이 없습니다. 아래에서 직접 추가하세요.</Text> : null}
       <View style={styles.addRow}>
-        <TextInput accessibilityLabel="새 항목 이름" placeholder="예: 성 / 관사, 읽기 유형" placeholderTextColor={Palette.placeholder}
+        <TextInput accessibilityLabel="새 항목 이름" placeholder="예: 성 / 관사, 읽기 유형" placeholderTextColor={Palette.gray50}
           value={newName} onChangeText={(value) => { setNewName(value); setError(null); }} editable={!disabled}
           autoCapitalize="none" returnKeyType="done" onSubmitEditing={() => { if (newName.trim() && !disabled) add(newName); }}
           style={[styles.input, styles.nameInput]} />
@@ -91,7 +91,7 @@ export function CustomFieldsEditor({ languageId, fields, onChange, disabled }: P
           <View style={styles.addRow}>
             <TextInput accessibilityLabel={`자유 항목 ${index + 1} 이름`} value={field.label}
               onChangeText={(value) => change(index, "label", value)} editable={!disabled}
-              placeholder="항목 이름" placeholderTextColor={Palette.placeholder} style={[styles.input, styles.nameInput]} />
+              placeholder="항목 이름" placeholderTextColor={Palette.gray50} style={[styles.input, styles.nameInput]} />
             <Pressable accessibilityRole="button" accessibilityLabel={`${field.label || "자유"} 항목 빼기`}
               disabled={disabled} style={styles.button} onPress={() => { onChange(fields.filter((_, i) => i !== index)); setError(null); }}>
               <Text style={styles.label}>빼기</Text>
@@ -99,7 +99,7 @@ export function CustomFieldsEditor({ languageId, fields, onChange, disabled }: P
           </View>
           <TextInput accessibilityLabel={`${field.label || "자유 항목"} 내용`} value={field.value}
             onChangeText={(value) => change(index, "value", value)} editable={!disabled}
-            placeholder="내용을 입력하세요" placeholderTextColor={Palette.placeholder} multiline
+            placeholder="내용을 입력하세요" placeholderTextColor={Palette.gray50} multiline
             autoCapitalize="none" style={[styles.input, styles.multiline]} />
         </View>
       ))}
@@ -109,18 +109,18 @@ export function CustomFieldsEditor({ languageId, fields, onChange, disabled }: P
 
 const styles = StyleSheet.create({
   section: { gap: 12 },
-  title: { fontFamily: Fonts.sans, fontSize: FontSizes.label, fontWeight: "600", color: Palette.textLabel },
-  hint: { fontFamily: Fonts.sans, fontSize: FontSizes.helper, lineHeight: 20, color: Palette.textHint },
+  title: { fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600", color: Palette.gray70 },
+  hint: { fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, color: Palette.gray60 },
   options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   addRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  input: { minHeight: 52, borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 6, padding: 14, color: Palette.textInput, fontFamily: Fonts.sans, fontSize: FontSizes.body, backgroundColor: Palette.white },
+  input: { minHeight: 52, borderWidth: 1, borderColor: Palette.gray20, borderRadius: 6, padding: 14, color: Palette.text, fontFamily: Fonts.sans, fontSize: FontSizes.body, backgroundColor: Palette.white },
   nameInput: { flex: 1, minWidth: 0 },
   multiline: { minHeight: 100, textAlignVertical: "top" },
-  button: { minHeight: 44, justifyContent: "center", alignItems: "center", paddingHorizontal: 12, borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 6 },
-  label: { fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.textLabel },
-  selected: { backgroundColor: Palette.textInput, borderColor: Palette.textInput },
+  button: { minHeight: 44, justifyContent: "center", alignItems: "center", paddingHorizontal: 12, borderWidth: 1, borderColor: Palette.gray20, borderRadius: 6 },
+  label: { fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.gray70 },
+  selected: { backgroundColor: Palette.text, borderColor: Palette.text },
   selectedLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.small },
-  customField: { gap: 10, padding: 12, borderRadius: 6, borderWidth: 1, borderColor: Palette.borderInput },
+  customField: { gap: 10, padding: 12, borderRadius: 6, borderWidth: 1, borderColor: Palette.gray20 },
   disabled: { opacity: 0.4 },
   error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20 },
 });

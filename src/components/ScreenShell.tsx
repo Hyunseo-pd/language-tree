@@ -79,13 +79,13 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
-    color: Palette.textStrong,
+    color: Palette.text,
     fontFamily: Fonts.sans, fontSize: FontSizes.title,
     fontWeight: "700",
   },
   subtitle: {
     textAlign: "center",
-    color: Palette.textMuted,
+    color: Palette.gray60,
     fontFamily: Fonts.sans, fontSize: FontSizes.body,
   },
   scroller: {
