@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
+import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { useRef, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -56,13 +56,13 @@ export function FolderNameDialog({ initialName, title, onClose, onSave }: Props)
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: "center", padding: 24, backgroundColor: "rgba(0,0,0,0.4)" },
-  dialog: { alignSelf: "center", width: "100%", maxWidth: 420, padding: 24, borderRadius: 20, backgroundColor: Palette.white, gap: 20 },
-  title: { fontFamily: Fonts.sans, fontSize: FontSizes.heading, fontWeight: "700", color: Palette.textInput },
-  input: { minHeight: 56, borderWidth: 1, borderColor: Palette.borderInput, borderRadius: 12, padding: 16, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.textInput },
+  overlay: { flex: 1, justifyContent: "center", padding: 26, backgroundColor: "rgba(0,0,0,0.4)" },
+  dialog: { alignSelf: "center", width: "100%", maxWidth: 420, padding: 24, borderRadius: 10, backgroundColor: Palette.background, gap: 20 },
+  title: { fontFamily: Fonts.sans, fontSize: FontSizes.heading, fontWeight: "700", color: Palette.text },
+  input: { minHeight: 56, borderWidth: 1, backgroundColor: Palette.white, borderColor: Palette.gray20, borderRadius: 12, padding: 16, fontFamily: Fonts.sans, fontSize: FontSizes.input, color: Palette.text },
   actions: { flexDirection: "row", gap: 12 },
-  button: { flex: 1, minHeight: 48, borderRadius: 12, backgroundColor: Palette.surfaceMuted, justifyContent: "center", alignItems: "center" },
-  save: { backgroundColor: Palette.textInput },
+  button: { flex: 1, minHeight: 48, borderRadius: 12, backgroundColor: Palette.gray10, justifyContent: "center", alignItems: "center" },
+  save: { backgroundColor: Palette.gray50 },
   saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600" },
   disabled: { opacity: 0.4 },
   error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small },

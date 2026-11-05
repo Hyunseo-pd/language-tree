@@ -18,8 +18,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { deleteWord, getCachedWords, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { getWordDetails } from "@/lib/wordFields";
-import { sortWords, useWordSort } from "@/lib/wordSort";
 import { rememberCardWord } from "@/lib/wordListReturn";
+import { sortWords, useWordSort } from "@/lib/wordSort";
 
 export default function WordCardScreen() {
   const { wordId, languageId } = useLocalSearchParams<{
@@ -331,9 +331,9 @@ const styles = StyleSheet.create({
   meaning: { fontFamily: Fonts.sans, fontSize: FontSizes.meaning, fontWeight: "700", color: palette.text, textAlign: "center", lineHeight: 42 },
   detail: { gap: 6, borderTopWidth: 1, borderTopColor: palette.gray50, paddingTop: 16 },
   detailLabel: { color: palette.gray50, fontFamily: Fonts.sans, fontSize: FontSizes.small, fontWeight: "600" },
-  detailValue: { color: palette.icon, fontFamily: Fonts.sans, fontSize: FontSizes.detail, lineHeight: 28 },
+  detailValue: { color: palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.detail, lineHeight: 28 },
   footer: { height: 48, marginTop: 4, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   centerState: { alignItems: "center", gap: 10 },
   errorText: { color: Palette.error, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, paddingHorizontal: 24, textAlign: "center" },
-  stateText: { color: palette.icon, fontFamily: Fonts.sans, fontSize: FontSizes.label, lineHeight: 22, textAlign: "center" },
+  stateText: { color: palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.label, lineHeight: 22, textAlign: "center" },
 });
