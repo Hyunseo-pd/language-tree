@@ -59,10 +59,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 12,
-    paddingVertical: 12,
+    paddingVertical: 0,
   },
   header: {
-    marginBottom: 8,
+    marginBottom: 0,
   },
   headerRow: {
     flexDirection: "row",
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: Palette.text,
     fontFamily: Fonts.sans, fontSize: FontSizes.title,
-    fontWeight: "700",
+    fontWeight: "800",
   },
   subtitle: {
     textAlign: "center",
@@ -93,6 +93,6 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: 12,
-    paddingBottom: 24,
+    paddingBottom: 12,
   },
 });

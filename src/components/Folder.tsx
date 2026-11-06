@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     color: Palette.text,
     fontSize: 24,
-    fontWeight: "600",
+    fontWeight: "400",
   },
   wordCount: {
     color: Palette.gray60,
