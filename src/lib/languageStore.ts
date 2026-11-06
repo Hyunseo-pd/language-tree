@@ -1,4 +1,4 @@
-import { deleteDoc, arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, query, where, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
+import { deleteDoc, arrayUnion, writeBatch, addDoc, collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, query, limit, where, serverTimestamp, Timestamp, updateDoc, type DocumentData, type FirestoreError } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 import { normalizeWordValues, readWordDetails, uniqueFieldNames, type WordDetail, type WordValues } from "@/lib/wordFields";
@@ -93,6 +93,22 @@ export async function renameLanguage(languageId: string, name: string): Promise<
     updatedAt: serverTimestamp(),
   });
   cachedLanguages = cachedLanguages?.map((language) => language.id === languageId ? { ...language, name: trimmedName } : language);
+  languagesFetchedAt = 0;
+}
+
+// Delete folder contents in bounded batches, then remove the folder catalog entry.
+export async function deleteLanguage(languageId: string): Promise<void> {
+  if (!languageId) throw new Error("삭제할 폴더를 찾을 수 없습니다.");
+  while (true) {
+    const snapshot = await getDocs(query(collection(db, languageId), limit(400)));
+    if (snapshot.empty) break;
+    const batch = writeBatch(db);
+    snapshot.docs.forEach((document) => batch.delete(document.ref));
+    await batch.commit();
+  }
+  await deleteDoc(doc(db, "languages", languageId));
+  cachedLanguages = cachedLanguages?.filter((language) => language.id !== languageId);
+  wordCache.delete(languageId);
   languagesFetchedAt = 0;
 }
 

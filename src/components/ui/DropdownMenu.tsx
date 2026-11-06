@@ -5,12 +5,13 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, Vi
 
 import { WordnoteIcons } from "@/constants/wordnote";
 
-export type DropdownOption<T extends string> = { value: T; label: string };
+export type DropdownOption<T extends string> = { value: T; label: string; destructive?: boolean };
 
 export type DropdownMenuProps<T extends string> = {
   label: string;
   options: readonly DropdownOption<T>[];
-  value: T;
+  value?: T;
+  icon?: keyof typeof WordnoteIcons;
   onChange: (value: T) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -18,7 +19,7 @@ export type DropdownMenuProps<T extends string> = {
 };
 
 export function DropdownMenu<T extends string>({
-  label, options, value, onChange, open, onOpenChange, disabled = false,
+  label, options, value, onChange, open, onOpenChange, disabled = false, icon,
 }: DropdownMenuProps<T>) {
   const trigger = useRef<ComponentRef<typeof View>>(null);
   const [anchor, setAnchor] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
@@ -43,9 +44,9 @@ export function DropdownMenu<T extends string>({
     <View style={styles.container}>
       <Pressable ref={trigger} accessibilityRole="button" accessibilityLabel={label}
         accessibilityState={{ expanded: open, disabled }} disabled={disabled}
-        onPress={toggle} style={({ pressed }) => [styles.trigger, (pressed || disabled) && styles.dimmed]}>
-        <Text style={styles.label}>{label}</Text>
-        <Image source={open ? WordnoteIcons.sortUp : WordnoteIcons.sort} style={styles.icon} contentFit="contain" />
+        onPress={toggle} style={({ pressed }) => [styles.trigger, icon && styles.iconTrigger, (pressed || disabled) && styles.dimmed]}>
+        {!icon && <Text style={styles.label}>{label}</Text>}
+        <Image source={icon ? WordnoteIcons[icon] : open ? WordnoteIcons.sortUp : WordnoteIcons.sort} style={styles.icon} contentFit="contain" />
       </Pressable>
       <Modal visible={open && !disabled && anchor !== null} transparent animationType="none"
         statusBarTranslucent navigationBarTranslucent onRequestClose={() => onOpenChange(false)}>
@@ -58,8 +59,8 @@ export function DropdownMenu<T extends string>({
                 <Pressable key={option.value} accessibilityRole="button"
                   accessibilityState={{ selected: option.value === value }}
                   style={({ pressed }) => [styles.option, option.value === value && styles.selected, pressed && styles.dimmed]}
-                  onPress={() => { onChange(option.value); onOpenChange(false); }}>
-                  <Text style={[styles.optionLabel, option.value === value && styles.selectedLabel]}>{option.label}</Text>
+                  onPress={() => { onOpenChange(false); onChange(option.value); }}>
+                  <Text style={[styles.optionLabel, option.destructive && styles.destructiveLabel, option.value === value && styles.selectedLabel]}>{option.label}</Text>
                 </Pressable>
               ))}
             </ScrollView>
@@ -73,6 +74,8 @@ export function DropdownMenu<T extends string>({
 const styles = StyleSheet.create({
   container: { alignSelf: "center" },
   trigger: { minHeight: 36, flexDirection: "row", alignItems: "center", backgroundColor: palette.white, borderWidth: 1, borderColor: palette.gray50, borderRadius: 12, paddingHorizontal: 4, gap: 4 },
+  iconTrigger: { width: 44, height: 44, justifyContent: "center", borderWidth: 0, backgroundColor: "transparent", paddingHorizontal: 0 },
+  destructiveLabel: { color: palette.destructive },
   label: { minWidth: 36, textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.body, color: palette.text },
   icon: { width: 36, height: 36 },
   dimmed: { opacity: 0.6 },

@@ -1,8 +1,8 @@
-import { Folder } from "@/components/Folder";
+import { Folder } from "@/components/ui/Folder";
 import { FolderNameDialog } from "@/components/FolderNameDialog";
 import { ScreenShell } from "@/components/ScreenShell";
 import { IconButton } from "@/components/ui/IconButton";
-import { createLanguage, getCachedLanguages, getLanguages, renameLanguage, type LanguageFolder } from "@/lib/languageStore";
+import { createLanguage, deleteLanguage, getCachedLanguages, getLanguages, renameLanguage, type LanguageFolder } from "@/lib/languageStore";
 import { Link, useFocusEffect, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import { View } from "react-native";
@@ -65,6 +65,10 @@ export default function LanguagesHomeScreen() {
             label={language.name}
             wordCount={language.wordCount}
             onRename={() => setEditor({ language })}
+            onDelete={async () => {
+              await deleteLanguage(language.id);
+              setLanguages((previous) => previous.filter((item) => item.id !== language.id));
+            }}
           />
         </Link>
       ))}
