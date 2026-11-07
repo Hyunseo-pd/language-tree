@@ -2,7 +2,7 @@ import { DeleteButton } from "@/components/ui/DeleteButton";
 import { Fonts, FontSizes, Palette as palette, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
 import { Image } from "expo-image";
-import { Link, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
+import { Link, router, useFocusEffect, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { CardScreenLayout } from "@/components/CardScreenLayout";
 
 import { deleteWord, getCachedWords, subscribeToWords, type WordItem } from "@/lib/languageStore";
 import { FlipCard } from "@/components/FlipCard";
@@ -177,22 +177,12 @@ export default function WordCardScreen() {
     });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>
-        <View style={styles.header}>
-          <Link dismissTo href={languageId ? (`/languages/${encodeURIComponent(languageId)}` as Href) : "/"} asChild>
-            <Pressable accessibilityRole="button" accessibilityLabel="단어 목록으로" style={styles.iconButton}>
-              <Image source={WordnoteIcons.back} style={styles.icon} contentFit="contain" />
-            </Pressable>
-          </Link>
-          <Link dismissTo href={languageId ? (`/languages/${encodeURIComponent(languageId)}` as Href) : "/"} asChild>
-            <Pressable accessibilityRole="button" accessibilityLabel="단어 목록으로" style={styles.counterButton}>
-              <Text style={styles.counter}>
-                {words.length === 0 ? 0 : index + 1}/{words.length}
-              </Text>
-            </Pressable>
-          </Link>
-          <View style={styles.headerActions}>
+    <CardScreenLayout index={index} total={words.length}
+      onExit={() => router.dismissTo(languageId ? `/languages/${encodeURIComponent(languageId)}` as Href : "/")}
+      disabled={!canInteract} saving={isDeleting}
+      onPrevious={() => { if (!transitioning.get()) showPrevious(); }}
+      onNext={() => { if (!transitioning.get()) showNext(); }}
+      actions={<>
             <DeleteButton placement="below" onDelete={removeCurrentWord} disabled={!canInteract || !languageId}
               accessibilityLabel="단어 삭제 메뉴" />
             <Link href={{ pathname: "/[wordId]/edit", params: { wordId: currentWord?.id ?? wordId, languageId } } as Href} asChild>
@@ -200,9 +190,7 @@ export default function WordCardScreen() {
                 <Image source={WordnoteIcons.edit} style={styles.icon} contentFit="contain" />
               </Pressable>
             </Link>
-          </View>
-        </View>
-
+      </>}>
         <GestureDetector gesture={Gesture.Exclusive(swipeGesture, tapGesture)}>
         <View style={styles.cardViewport} onLayout={(event) => { cardWidth.set(event.nativeEvent.layout.width - 24); }}>
         {canInteract && previousWord && nextWord ? (
@@ -257,43 +245,18 @@ export default function WordCardScreen() {
         </View>
         </GestureDetector>
 
-        <View style={styles.footer}>
-          <Pressable accessibilityRole="button" accessibilityLabel="이전 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showPrevious(); }}>
-            <Image source={WordnoteIcons.previous} style={styles.icon} contentFit="contain" />
-          </Pressable>
-
-          <Pressable accessibilityRole="button" accessibilityLabel="다음 단어" disabled={!canInteract} style={styles.iconButton} onPress={() => { if (!transitioning.get()) showNext(); }}>
-            <Image source={WordnoteIcons.next} style={styles.icon} contentFit="contain" />
-          </Pressable>
-        </View>
-      </View>
-    </SafeAreaView>
+    </CardScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: palette.background },
-  screen: { flex: 1, paddingHorizontal: 16, paddingBottom: 34 },
-  header: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   icon: { width: 36, height: 36 },
   iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  counterButton: { position: "absolute", left: 88, right: 88, minHeight: 44, alignItems: "center", justifyContent: "center" },
-  counter: { textAlign: "center", fontFamily: Fonts.sans, fontSize: FontSizes.bodyLarge, lineHeight: 24, color: palette.text },
   cardViewport: { flex: 1, marginTop: 4, marginHorizontal: -12, paddingHorizontal: 12, overflow: "hidden" ,paddingVertical: 8 },
   card: { flex: 1, position: "relative", alignItems: "center", justifyContent: "center", backgroundColor: palette.background, borderRadius: 10, },
   previewCard: { position: "absolute", top: 8, bottom: 8, left: 12, right: 12 },
-  cardFace: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: palette.background, backfaceVisibility: "hidden" , borderColor: palette.gray50, borderWidth: 1,  boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)"},
   word: { color: palette.text, fontFamily: Fonts.word, fontSize: FontSizes.hero, fontWeight: "800", lineHeight: 54, paddingHorizontal: 13, textAlign: "center" },
   hint: { marginTop: 16, fontFamily: Fonts.sans, fontSize: FontSizes.body, lineHeight: 24, color: palette.gray50, textAlign: "center" },
-  detailScroll: { flex: 1, width: "100%", borderRadius: 10 },
-  details: { flexGrow: 1, justifyContent: "center", padding: 24, gap: 20 },
-  backWord: { fontFamily: Fonts.word, fontSize: FontSizes.wordLabel, fontWeight: "600", color: palette.gray50, textAlign: "center" },
-  meaning: { fontFamily: Fonts.sans, fontSize: FontSizes.meaning, fontWeight: "700", color: palette.text, textAlign: "center", lineHeight: 42 },
-  detail: { gap: 6, borderTopWidth: 1, borderTopColor: palette.gray50, paddingTop: 16 },
-  detailLabel: { color: palette.gray50, fontFamily: Fonts.sans, fontSize: FontSizes.small, fontWeight: "600" },
-  detailValue: { color: palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.detail, lineHeight: 28 },
-  footer: { height: 48, marginTop: 4, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   centerState: { alignItems: "center", gap: 10 },
   errorText: { color: Palette.error, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, paddingHorizontal: 24, textAlign: "center" },
   stateText: { color: palette.gray70, fontFamily: Fonts.sans, fontSize: FontSizes.body, lineHeight: 22, textAlign: "center" },
