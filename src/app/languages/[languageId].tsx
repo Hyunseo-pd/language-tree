@@ -1,4 +1,5 @@
 import { WordSortDropdown } from "@/components/WordSortDropdown";
+import { CardTestDialog } from "@/components/CardTestDialog";
 import { IconButton } from "@/components/ui/IconButton";
 import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { WordnoteIcons } from "@/constants/wordnote";
@@ -22,6 +23,7 @@ export default function LanguageWordsScreen() {
   const [language, setLanguage] = useState<{ id: string; name: string } | null>(null);
   const sort = useWordSort(languageId);
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [showMeanings, setShowMeanings] = useState(true);
@@ -179,6 +181,15 @@ export default function LanguageWordsScreen() {
         />
         )}
       />
+      {!isLoading && !errorMessage && words.length > 0 ? <Pressable accessibilityRole="button"
+        onPress={() => { setSortMenuOpen(false); Keyboard.dismiss(); setTestDialogOpen(true); }} style={styles.testButton}>
+        <Text style={styles.testLabel}>카드 테스트</Text>
+      </Pressable> : null}
+      {testDialogOpen ? <CardTestDialog available={words.length} onClose={() => setTestDialogOpen(false)}
+        onStart={(count, selection) => {
+          setTestDialogOpen(false);
+          router.push({ pathname: "/card-test", params: { languageId, count: String(count), selection } } as Href);
+        }} /> : null}
     </ScreenShell>
   );
 }
@@ -227,6 +238,9 @@ function SearchHeader({ value, onChange, onCancel }: {
 }
 
 const styles = StyleSheet.create({
+  testButton: { position: "absolute", left: 10, right: 10, bottom: 26, minHeight: 56, borderRadius: 32,
+    justifyContent: "center", alignItems: "center", backgroundColor: Palette.main, boxShadow: "2px 2px 4px rgba(0,0,0,0.2)" },
+  testLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.title, fontWeight: "700" },
   toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, },
   meaningToggle: { minHeight: 44, justifyContent: "center", paddingHorizontal: 8, borderRadius: 12 },
   meaningToggleText: { fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.gray60 },

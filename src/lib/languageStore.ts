@@ -99,12 +99,15 @@ export async function renameLanguage(languageId: string, name: string): Promise<
 // Delete folder contents in bounded batches, then remove the folder catalog entry.
 export async function deleteLanguage(languageId: string): Promise<void> {
   if (!languageId) throw new Error("삭제할 폴더를 찾을 수 없습니다.");
-  while (true) {
-    const snapshot = await getDocs(query(collection(db, languageId), limit(400)));
-    if (snapshot.empty) break;
-    const batch = writeBatch(db);
-    snapshot.docs.forEach((document) => batch.delete(document.ref));
-    await batch.commit();
+  const contents = [collection(db, languageId), collection(db, "languages", languageId, "studyWords")];
+  for (const content of contents) {
+    while (true) {
+      const snapshot = await getDocs(query(content, limit(400)));
+      if (snapshot.empty) break;
+      const batch = writeBatch(db);
+      snapshot.docs.forEach((document) => batch.delete(document.ref));
+      await batch.commit();
+    }
   }
   await deleteDoc(doc(db, "languages", languageId));
   cachedLanguages = cachedLanguages?.filter((language) => language.id !== languageId);

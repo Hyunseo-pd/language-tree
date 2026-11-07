@@ -7,7 +7,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "reac
 import {
   ActivityIndicator,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -17,6 +16,7 @@ import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { deleteWord, getCachedWords, subscribeToWords, type WordItem } from "@/lib/languageStore";
+import { FlipCard } from "@/components/FlipCard";
 import { getWordDetails } from "@/lib/wordFields";
 import { rememberCardWord } from "@/lib/wordListReturn";
 import { sortWords, useWordSort } from "@/lib/wordSort";
@@ -268,45 +268,6 @@ export default function WordCardScreen() {
         </View>
       </View>
     </SafeAreaView>
-  );
-}
-
-function FlipCard({ word, showMeaning }: { word: WordItem; showMeaning: boolean }) {
-  const rotation = useSharedValue(0);
-
-  useEffect(() => {
-    rotation.value = withTiming(showMeaning ? 180 : 0, { duration: 320 });
-  }, [showMeaning, rotation]);
-
-  const frontStyle = useAnimatedStyle(() => ({
-    transform: [{ perspective: 1200 }, { rotateY: `${rotation.value}deg` }],
-    opacity: rotation.value > 90 ? 0 : 1,
-  }));
-  const backStyle = useAnimatedStyle(() => ({
-    transform: [{ perspective: 1200 }, { rotateY: `${rotation.value + 180}deg` }],
-    opacity: rotation.value > 90 ? 1 : 0,
-  }));
-
-  return (
-    <View style={StyleSheet.absoluteFill} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Animated.View style={[styles.cardFace, frontStyle]} pointerEvents={showMeaning ? "none" : "auto"}>
-        <Text style={styles.word}>{word.word}</Text>
-        <Text style={styles.hint}>터치해서 뒤집기</Text>
-      </Animated.View>
-      <Animated.View style={[styles.cardFace, backStyle]} pointerEvents={showMeaning ? "auto" : "none"}>
-        <ScrollView style={styles.detailScroll} contentContainerStyle={styles.details} nestedScrollEnabled>
-          <Text style={styles.backWord}>{word.word}</Text>
-          <Text style={styles.meaning}>{word.meaning}</Text>
-          {getWordDetails(word).map(({ label, value }) => (
-            <View key={label} style={styles.detail}>
-              <Text style={styles.detailLabel}>{label}</Text>
-              <Text style={styles.detailValue}>{value}</Text>
-            </View>
-          ))}
-          <Text style={styles.hint}>터치해서 뒤집기</Text>
-        </ScrollView>
-      </Animated.View>
-    </View>
   );
 }
 
