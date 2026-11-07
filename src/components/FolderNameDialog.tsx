@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   input: { minHeight: 56, borderWidth: 1, backgroundColor: Palette.white, borderColor: Palette.gray20, borderRadius: 10, padding: 16, fontFamily: Fonts.sans, fontSize: FontSizes.body, color: Palette.text },
   actions: { flexDirection: "row", gap: 12 },
   button: { flex: 1, minHeight: 48, borderRadius: 8, backgroundColor: Palette.gray10, justifyContent: "center", alignItems: "center" },
-  save: { backgroundColor: Palette.gray50 },
+  save: { backgroundColor: Palette.main },
   saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "400" },
   disabled: { opacity: 0.4 },
   error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small },

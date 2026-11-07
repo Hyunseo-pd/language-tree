@@ -1,4 +1,4 @@
-import { Palette, Fonts, FontSizes } from "@/constants/theme";
+import { Fonts, FontSizes, Palette } from "@/constants/theme";
 import { router, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   hint: { fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 20, color: Palette.gray60 },
   success: { fontFamily: Fonts.sans, fontSize: FontSizes.small, color: Palette.success },
   error: { color: Palette.errorStrong, fontFamily: Fonts.sans, fontSize: FontSizes.small, lineHeight: 22 },
-  save: { minHeight: 54, borderRadius: 6, backgroundColor: Palette.text, alignItems: "center", justifyContent: "center" },
+  save: { minHeight: 54, borderRadius: 6, backgroundColor: Palette.main, alignItems: "center", justifyContent: "center" },
   disabled: { opacity: 0.4 },
   saveLabel: { color: Palette.white, fontFamily: Fonts.sans, fontSize: FontSizes.body, fontWeight: "600" },
   secondary: { minHeight: 48, alignItems: "center", justifyContent: "center", backgroundColor: Palette.gray10, borderRadius: 6 },

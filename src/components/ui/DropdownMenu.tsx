@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   overlay: { flex: 1 },
   menu: { position: "absolute", padding: 8, backgroundColor: palette.white, borderRadius: 12, borderWidth: 1, borderColor: palette.gray50, shadowColor: palette.text, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
   option: { minHeight: 48, justifyContent: "center", paddingHorizontal: 8, borderRadius: 8 },
-  selected: { backgroundColor: palette.gray60 },
+  selected: { backgroundColor: palette.main2 },
   optionLabel: { color: palette.text, fontFamily: Fonts.sans, fontSize: FontSizes.body },
   selectedLabel: { color: palette.background },
 });

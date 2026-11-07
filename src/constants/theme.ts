@@ -6,6 +6,8 @@ import { Platform } from 'react-native';
 export const Palette = {
   white: '#FFFFFF', 
   background: '#FDFBF3', 
+  main: '#114817',
+  main2: '#4D6F24',
   text: '#000000', 
   gray70: '#424242',
   gray60: '#666666',
