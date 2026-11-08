@@ -44,6 +44,11 @@ export default function LanguagesHomeScreen() {
   return (
     <ScreenShell
       title="나의 언어"
+      headerLeft={
+        <Link href="/language-tree" asChild>
+          <IconButton icon="tree" accessibilityLabel="언어의 나무" />
+        </Link>
+      }
       
       headerRight={
         <IconButton icon="plus" accessibilityLabel="폴더 추가" disabled={isLoading} onPress={() => setEditor({})} />
